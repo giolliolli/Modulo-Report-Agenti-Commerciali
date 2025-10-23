@@ -60,8 +60,9 @@ Sei tu a decidere quando e come spostare i dati. L'esportazione avviene solo qua
 
 
 
-1. **Apri il File:** Salva il file `.html` dell'app sul tuo dispositivo e aprilo con un browser web (es. Chrome, Safari).
+1. **Apri il File:** Digita https://giolliolli.github.io/Modulo-Report-Agenti-Commerciali/ sul motore di ricerca del tuo dispositivo
 2. **Aggiungi alla Home (Consigliato):** Per un accesso rapido, usa la funzione del browser "Aggiungi a schermata Home". In questo modo avrai un'icona dedicata come una vera e propria app.
 3. **Compila i Report:** Inserisci i dati per ogni visita. L'app salverà automaticamente ogni report sul dispositivo.
 4. **Esporta i Dati:** A fine giornata, clicca su "Esporta Tutto in CSV" per generare il file con tutti i report raccolti.
 5. **Invia il File:** Condividi il file `.csv` generato secondo le procedure aziendali.
+6. **Resetta la cache:** Il file ha l'opzione di resettare i dati locali del browser, per generare nuovi report in base a incontri/fiere/eventi differenti.
