@@ -1,10 +1,12 @@
-<!DOCTYPE html>
+YPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebApp Report Visite</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Libreria per creare file Excel (.xlsx) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -25,6 +27,11 @@
         /* Stili per il modale di conferma */
         #confirmation-modal.hidden {
             display: none;
+        }
+        /* Stile per input obbligatorio non compilato */
+        .input-error {
+            border-color: #ef4444; /* red-500 */
+            box-shadow: 0 0 0 2px #fecaca; /* red-200 */
         }
     </style>
 </head>
@@ -97,7 +104,7 @@
                             </datalist>
                         </div>
                         <div>
-                            <label for="competitors" class="block text-sm font-medium text-gray-600 mb-1">Concorrenti Creati</label>
+                            <label for="competitors" class="block text-sm font-medium text-gray-600 mb-1">Concorrenti Citati</label>
                             <input type="text" id="competitors" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
                         </div>
                          <div>
@@ -181,11 +188,18 @@
                     </div>
                 </div>
 
-                <!-- Pagina 3: Note -->
+                <!-- Pagina 3: Note e Cognome Agente -->
                 <div id="page3" class="page">
-                    <div>
-                        <label for="notes" class="block text-sm font-medium text-gray-600 mb-1">Note</label>
-                        <textarea id="notes" rows="12" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Aggiungi qui le tue note strategiche..."></textarea>
+                    <div class="space-y-6">
+                        <div>
+                            <label for="notes" class="block text-sm font-medium text-gray-600 mb-1">Note</label>
+                            <textarea id="notes" rows="10" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Aggiungi qui le tue note strategiche..."></textarea>
+                        </div>
+                        <!-- NUOVO CAMPO -->
+                        <div>
+                            <label for="agent-name" class="block text-sm font-medium text-gray-600 mb-1">Cognome Agente</label>
+                            <input type="text" id="agent-name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Es. Rossi">
+                        </div>
                     </div>
                 </div>
             </form>
@@ -204,8 +218,8 @@
                 Hai <strong id="visit-count" class="text-blue-600">0</strong> visite salvate sul dispositivo.
             </p>
             <div class="flex flex-col md:flex-row gap-4 justify-center">
-                <button id="export-csv" class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all shadow-md disabled:bg-gray-400" disabled>
-                    Esporta Tutto in CSV
+                <button id="export-excel" class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all shadow-md disabled:bg-gray-400" disabled>
+                    Esporta Tutto in Excel
                 </button>
                 <button id="clear-data" class="bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 transition-all shadow-md disabled:bg-gray-400" disabled>
                     Svuota Dati Locali
@@ -228,27 +242,28 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // Riferimenti agli elementi
         const reportForm = document.getElementById('report-form');
         const pageIndicator = document.getElementById('page-indicator');
         const pages = document.querySelectorAll('.page');
         const btnPrev = document.getElementById('btn-prev');
         const btnNext = document.getElementById('btn-next');
-
-        const exportSection = document.getElementById('export-section');
-        const exportButton = document.getElementById('export-csv');
-        const clearButton = document.getElementById('clear-data'); // Nuovo pulsante
+        const exportButton = document.getElementById('export-excel'); // Modificato
+        const clearButton = document.getElementById('clear-data');
         const visitCountSpan = document.getElementById('visit-count');
         const feedbackMessage = document.getElementById('feedback-message');
-
-        // Elementi del modale
         const modal = document.getElementById('confirmation-modal');
         const modalVisitCount = document.getElementById('modal-visit-count');
         const modalBtnCancel = document.getElementById('modal-btn-cancel');
         const modalBtnConfirm = document.getElementById('modal-btn-confirm');
+        
+        // Input obbligatori
+        const companyNameInput = document.getElementById('company-name');
+        const agentNameInput = document.getElementById('agent-name');
 
         let currentPage = 1;
         let allVisits = [];
-        const pageTitles = ["Dati Azienda", "Dati Contatto", "Note"];
+        const pageTitles = ["Dati Azienda", "Dati Contatto", "Note e Agente"];
         
         // --- Gestione Storage ---
         const loadVisitsFromLocalStorage = () => {
@@ -262,16 +277,23 @@
             localStorage.setItem('salesReportVisits', JSON.stringify(allVisits));
         };
 
+        // --- Funzione Utility per Feedback Visivo Errore ---
+        const showInputError = (inputElement, message) => {
+            inputElement.classList.add('input-error');
+            const originalPlaceholder = inputElement.placeholder;
+            inputElement.placeholder = message;
+            
+            inputElement.addEventListener('input', () => {
+                inputElement.classList.remove('input-error');
+                inputElement.placeholder = originalPlaceholder;
+            }, { once: true });
+        };
+        
         // --- Aggiornamento UI ---
         const updateUI = () => {
             visitCountSpan.textContent = allVisits.length;
-            if (allVisits.length > 0) {
-                exportButton.disabled = false;
-                clearButton.disabled = false; // Abilita/disabilita anche il tasto "svuota"
-            } else {
-                exportButton.disabled = true;
-                clearButton.disabled = true;
-            }
+            exportButton.disabled = allVisits.length === 0;
+            clearButton.disabled = allVisits.length === 0;
             showPage(currentPage);
         };
 
@@ -294,7 +316,7 @@
             }
         };
         
-        // --- Navigazione Pagine ---
+        // --- Navigazione Pagine e Validazione ---
         btnPrev.addEventListener('click', () => {
             if (currentPage > 1) {
                 currentPage--;
@@ -303,22 +325,21 @@
         });
         
         btnNext.addEventListener('click', () => {
+            // Validazione Pagina 1
+            if (currentPage === 1 && companyNameInput.value.trim() === '') {
+                showInputError(companyNameInput, 'Il campo Nome è obbligatorio');
+                return;
+            }
+
             if (currentPage < 3) {
-                 // Validazione semplice
-                if (currentPage === 1 && document.getElementById('company-name').value.trim() === '') {
-                    // Sostituiamo l'alert con un feedback visivo
-                    const companyNameInput = document.getElementById('company-name');
-                    companyNameInput.classList.add('border-red-500', 'ring-2', 'ring-red-300');
-                    companyNameInput.placeholder = 'Il campo Nome è obbligatorio';
-                    setTimeout(() => {
-                        companyNameInput.classList.remove('border-red-500', 'ring-2', 'ring-red-300');
-                        companyNameInput.placeholder = '';
-                    }, 3000);
-                    return;
-                }
                 currentPage++;
                 showPage(currentPage);
             } else {
+                // Validazione Pagina 3 (Cognome Agente)
+                if (agentNameInput.value.trim() === '') {
+                    showInputError(agentNameInput, 'Il Cognome Agente è obbligatorio');
+                    return;
+                }
                 saveVisit();
             }
         });
@@ -328,7 +349,7 @@
             const visitData = {
                 timestamp: new Date().toLocaleString('it-IT'),
                 // Pagina 1
-                companyName: document.getElementById('company-name').value.trim(),
+                companyName: companyNameInput.value.trim(),
                 companyState: document.getElementById('company-state').value.trim(),
                 companyCity: document.getElementById('company-city').value.trim(),
                 companyAddress: document.getElementById('company-address').value.trim(),
@@ -350,7 +371,8 @@
                 nextMeetingDate: document.getElementById('next-meeting-date').value,
                 decision: document.getElementById('decision').value.trim(),
                 // Pagina 3
-                notes: document.getElementById('notes').value.trim()
+                notes: document.getElementById('notes').value.trim(),
+                agentName: agentNameInput.value.trim() // Nuovo campo
             };
 
             allVisits.push(visitData);
@@ -364,63 +386,58 @@
             updateUI();
         };
 
-        // --- Logica di Esportazione ---
+        // --- NUOVA LOGICA DI ESPORTAZIONE (EXCEL) ---
         exportButton.addEventListener('click', () => {
             if (allVisits.length === 0) return;
 
-            const headers = [
-                'Data Registrazione', 'Nome Azienda', 'Stato/Regione', 'Città', 'Indirizzo', 'Divisione', 'Settore', 'Tipologia', 'Concorrenti Creati', 'Sensibilità Prezzo', 'Volumi Attesi',
-                'Nome Contatto', 'Cognome Contatto', 'Telefono Contatto', 'Email Contatto', 'Ruolo Contatto', 'Tipo Incontro', 'Oggetto Incontro', 'Data Incontro', 'Prossimo Incontro', 'Decisione',
-                'Note'
+            // 1. Dati per il foglio "Anagrafica"
+            const anagraficaHeaders = [
+                "Agente Compilatore", "Ragione Sociale", "Indirizzo", "Luogo", "Regione/Stato", 
+                "Settore", "Divisione", "Tipologia", 
+                "Nome", "Cognome", "Contatto Telefonico", "Email", "Ruolo"
             ];
+            const anagraficaData = allVisits.map(v => [
+                v.agentName, v.companyName, v.companyAddress, v.companyCity, v.companyState,
+                v.sector, v.division, v.typology,
+                v.contactName, v.contactSurname, v.contactPhone, v.contactEmail, v.contactRole
+            ]);
+            const ws_anagrafica = XLSX.utils.aoa_to_sheet([anagraficaHeaders, ...anagraficaData]);
 
-            const escapeCSV = (field) => {
-                if (field === null || field === undefined) return '';
-                let str = String(field);
-                if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-                    str = str.replace(/"/g, '""');
-                    return `"${str}"`;
-                }
-                return str;
-            };
+            // 2. Dati per il foglio "Info Strategiche"
+            const infoHeaders = [
+                "Agente Compilatore", "Ragione Sociale", // Aggiunti per riferimento
+                "Data Incontro", "Tipo di incontro", "Oggetto dell'Incontro", "Outcome/Decisione", 
+                "Prossimo Incontro", "Concorrenti Citati", "Sensibilità al Prezzo", "Volumi Attesi", "Note Strategiche"
+            ];
+            const infoData = allVisits.map(v => [
+                v.agentName, v.companyName,
+                v.meetingDate, v.meetingType, v.meetingSubject, v.decision,
+                v.nextMeetingDate, v.competitors, v.priceSensitivity, v.expectedVolume, v.notes
+            ]);
+            const ws_info = XLSX.utils.aoa_to_sheet([infoHeaders, ...infoData]);
 
-            const csvRows = [headers.join(',')];
-            allVisits.forEach(v => {
-                const row = [
-                    escapeCSV(v.timestamp), escapeCSV(v.companyName), escapeCSV(v.companyState), escapeCSV(v.companyCity), escapeCSV(v.companyAddress), escapeCSV(v.division), escapeCSV(v.sector), escapeCSV(v.typology), escapeCSV(v.competitors), escapeCSV(v.priceSensitivity), escapeCSV(v.expectedVolume),
-                    escapeCSV(v.contactName), escapeCSV(v.contactSurname), escapeCSV(v.contactPhone), escapeCSV(v.contactEmail), escapeCSV(v.contactRole), escapeCSV(v.meetingType), escapeCSV(v.meetingSubject), escapeCSV(v.meetingDate), escapeCSV(v.nextMeetingDate), escapeCSV(v.decision),
-                    escapeCSV(v.notes)
-                ];
-                csvRows.push(row.join(','));
-            });
+            // 3. Creazione del Workbook
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws_anagrafica, "Anagrafica");
+            XLSX.utils.book_append_sheet(wb, ws_info, "Info Strategiche");
 
-            const csvContent = csvRows.join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
+            // 4. Download del file
             const date = new Date().toISOString().slice(0, 10);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `report-visite-commerciali-${date}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const fileName = `report-visite-${v.agentName || 'agenti'}-${date}.xlsx`;
+            XLSX.writeFile(wb, fileName);
         });
         
-        // --- NUOVA LOGICA: Svuota Dati ---
-        
-        // Mostra il modale di conferma
+        // --- Logica Svuota Dati ---
         clearButton.addEventListener('click', () => {
             if (allVisits.length === 0) return;
             modalVisitCount.textContent = allVisits.length;
             modal.classList.remove('hidden');
         });
 
-        // Annulla l'eliminazione
         modalBtnCancel.addEventListener('click', () => {
             modal.classList.add('hidden');
         });
 
-        // Conferma l'eliminazione
         modalBtnConfirm.addEventListener('click', () => {
             allVisits = [];
             saveVisitsToLocalStorage();
@@ -438,5 +455,3 @@
     </script>
 </body>
 </html>
-
-
