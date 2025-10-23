@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebApp Report Visite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .input-focus:focus {
+            box-shadow: 0 0 0 2px #3b82f6;
+            border-color: #3b82f6;
+        }
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4 md:p-8 max-w-3xl">
+        <main class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <div class="text-center mb-6 border-b pb-4">
+                <h1 class="text-3xl font-bold text-gray-800">Nuovo Report Visita</h1>
+                <p id="page-indicator" class="text-gray-500 mt-2 font-medium">Pagina 1 di 3: Dati Azienda</p>
+            </div>
+
+            <form id="report-form" class="space-y-6">
+                <!-- Pagina 1: Dati Azienda -->
+                <div id="page1" class="page active">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="md:col-span-2">
+                            <label for="company-name" class="block text-sm font-medium text-gray-600 mb-1">Nome</label>
+                            <input type="text" id="company-name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                        </div>
+                        <div>
+                            <label for="company-state" class="block text-sm font-medium text-gray-600 mb-1">Stato/Regione</label>
+                            <input type="text" id="company-state" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                        </div>
+                        <div>
+                            <label for="company-city" class="block text-sm font-medium text-gray-600 mb-1">Città</label>
+                            <input type="text" id="company-city" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="company-address" class="block text-sm font-medium text-gray-600 mb-1">Indirizzo</label>
+                            <input type="text" id="company-address" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                        </div>
+                        
+                        <!-- Campi con Datalist -->
+                        <div>
+                            <label for="division" class="block text-sm font-medium text-gray-600 mb-1">Divisione</label>
+                            <input list="division-list" id="division" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                            <datalist id="division-list">
+                                <option value="VidiVi Italia"></option>
+                                <option value="VidiVi Estero"></option>
+                                <option value="Casalingo Italia"></option>
+                                <option value="Casalingo Estero"></option>
+                                <option value="B2B Italia"></option>
+                                <option value="B2B Estero"></option>
+                            </datalist>
+                        </div>
+                        <div>
+                            <label for="sector" class="block text-sm font-medium text-gray-600 mb-1">Settore</label>
+                            <input list="sector-list" id="sector" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                            <datalist id="sector-list">
+                                <option value="Vario"></option>
+                                <option value="Soft Drinks"></option>
+                                <option value="Cantina"></option>
+                                <option value="Birreria"></option>
+                                <option value="Bar"></option>
+                                <option value="Distilleria"></option>
+                                <option value="Gelateria"></option>
+                            </datalist>
+                        </div>
+                        <div>
+                            <label for="typology" class="block text-sm font-medium text-gray-600 mb-1">Tipologia</label>
+                            <input list="typology-list" id="typology" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                            <datalist id="typology-list">
+                                <option value="GDS"></option>
+                                <option value="GDO"></option>
+                                <option value="Dettaglio"></option>
+                                <option value="Promozioni Aziendali"></option>
+                                <option value="Grossista"></option>
+                                <option value="Ho.Re.Ca."></option>
+                                <option value="E-commerce"></option>
+                            </datalist>
+                        </div>
+                        <div>
+                            <label for="competitors" class="block text-sm font-medium text-gray-600 mb-1">Concorrenti Creati</label>
+                            <input type="text" id="competitors" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                        </div>
+                         <div>
+                            <label for="price-sensitivity" class="block text-sm font-medium text-gray-600 mb-1">Sensibilità al Prezzo</label>
+                            <input list="price-sensitivity-list" id="price-sensitivity" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                            <datalist id="price-sensitivity-list">
+                                <option value="Alta"></option>
+                                <option value="Media"></option>
+                                <option value="Bassa"></option>
+                            </datalist>
+                        </div>
+                         <div>
+                            <label for="expected-volume" class="block text-sm font-medium text-gray-600 mb-1">Volumi Attesi</label>
+                            <input list="expected-volume-list" id="expected-volume" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                            <datalist id="expected-volume-list">
+                                <option value="Alti"></option>
+                                <option value="Medi"></option>
+                                <option value="Bassi"></option>
+                            </datalist>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagina 2: Dati Contatto -->
+                <div id="page2" class="page">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="contact-name" class="block text-sm font-medium text-gray-600 mb-1">Nome</label>
+                            <input type="text" id="contact-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                        </div>
+                        <div>
+                            <label for="contact-surname" class="block text-sm font-medium text-gray-600 mb-1">Cognome</label>
+                            <input type="text" id="contact-surname" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                        </div>
+                        <div>
+                            <label for="contact-phone" class="block text-sm font-medium text-gray-600 mb-1">Telefono</label>
+                            <input type="tel" id="contact-phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                        </div>
+                        <div>
+                            <label for="contact-email" class="block text-sm font-medium text-gray-600 mb-1">Email</label>
+                            <input type="email" id="contact-email" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                        </div>
+                        <div>
+                            <label for="contact-role" class="block text-sm font-medium text-gray-600 mb-1">Ruolo</label>
+                            <input type="text" id="contact-role" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                        </div>
+                        <div>
+                            <label for="meeting-type" class="block text-sm font-medium text-gray-600 mb-1">Tipo di Incontro</label>
+                            <input list="meeting-type-list" id="meeting-type" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                            <datalist id="meeting-type-list">
+                                <option value="Visita"></option>
+                                <option value="Chiamata"></option>
+                                <option value="Email"></option>
+                                <option value="Fiera"></option>
+                                <option value="Evento"></option>
+                            </datalist>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="meeting-subject" class="block text-sm font-medium text-gray-600 mb-1">Oggetto Incontro</label>
+                            <input type="text" id="meeting-subject" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                        </div>
+                        <div>
+                            <label for="meeting-date" class="block text-sm font-medium text-gray-600 mb-1">Data Incontro</label>
+                            <input type="date" id="meeting-date" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                        </div>
+                        <div>
+                            <label for="next-meeting-date" class="block text-sm font-medium text-gray-600 mb-1">Prossimo Incontro</label>
+                            <input type="date" id="next-meeting-date" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                        </div>
+                         <div class="md:col-span-2">
+                            <label for="decision" class="block text-sm font-medium text-gray-600 mb-1">Decisione</label>
+                            <input list="decision-list" id="decision" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                            <datalist id="decision-list">
+                                <option value="In Attesa"></option>
+                                <option value="Follow-Up"></option>
+                                <option value="Online Immediato"></option>
+                                <option value="Opportunità"></option>
+                                <option value="Richiede Campionatura"></option>
+                            </datalist>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagina 3: Note -->
+                <div id="page3" class="page">
+                    <div>
+                        <label for="notes" class="block text-sm font-medium text-gray-600 mb-1">Note</label>
+                        <textarea id="notes" rows="12" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Aggiungi qui le tue note strategiche..."></textarea>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Navigazione -->
+            <div class="pt-6 border-t mt-6 flex justify-between items-center">
+                <button id="btn-prev" class="bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all shadow-md">Indietro</button>
+                <button id="btn-next" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all shadow-md">Avanti</button>
+            </div>
+        </main>
+        
+        <!-- Sezione Esportazione -->
+        <div id="export-section" class="mt-8 bg-white rounded-xl shadow-lg p-6 text-center">
+            <div id="feedback-message" class="mb-4 text-green-700 font-medium"></div>
+            <p class="text-lg text-gray-800 mb-4">
+                Hai <strong id="visit-count" class="text-blue-600">0</strong> visite salvate sul dispositivo.
+            </p>
+            <button id="export-csv" class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all shadow-md disabled:bg-gray-400" disabled>
+                Esporta Tutto in CSV
+            </button>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const reportForm = document.getElementById('report-form');
+        const pageIndicator = document.getElementById('page-indicator');
+        const pages = document.querySelectorAll('.page');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+
+        const exportSection = document.getElementById('export-section');
+        const exportButton = document.getElementById('export-csv');
+        const visitCountSpan = document.getElementById('visit-count');
+        const feedbackMessage = document.getElementById('feedback-message');
+
+        let currentPage = 1;
+        let allVisits = [];
+        const pageTitles = ["Dati Azienda", "Dati Contatto", "Note"];
+        
+        // Carica dati dal localStorage all'avvio
+        const loadVisitsFromLocalStorage = () => {
+            const storedVisits = localStorage.getItem('salesReportVisits');
+            if (storedVisits) {
+                allVisits = JSON.parse(storedVisits);
+            }
+        };
+
+        const saveVisitsToLocalStorage = () => {
+            localStorage.setItem('salesReportVisits', JSON.stringify(allVisits));
+        };
+
+        const updateUI = () => {
+            visitCountSpan.textContent = allVisits.length;
+            if (allVisits.length > 0) {
+                exportButton.disabled = false;
+            } else {
+                exportButton.disabled = true;
+            }
+            showPage(currentPage);
+        };
+
+        const showPage = (pageNumber) => {
+            pages.forEach(p => p.classList.remove('active'));
+            document.getElementById(`page${pageNumber}`).classList.add('active');
+            
+            pageIndicator.textContent = `Pagina ${pageNumber} di 3: ${pageTitles[pageNumber - 1]}`;
+
+            btnPrev.style.visibility = (pageNumber === 1) ? 'hidden' : 'visible';
+            
+            if (pageNumber === 3) {
+                btnNext.textContent = 'Salva Visita';
+                btnNext.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                btnNext.classList.add('bg-green-600', 'hover:bg-green-700');
+            } else {
+                btnNext.textContent = 'Avanti';
+                btnNext.classList.remove('bg-green-600', 'hover:bg-green-700');
+                btnNext.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            }
+        };
+        
+        btnPrev.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                showPage(currentPage);
+            }
+        });
+        
+        btnNext.addEventListener('click', () => {
+            if (currentPage < 3) {
+                 // Validazione semplice: controlla se il nome azienda è stato inserito prima di procedere
+                if (currentPage === 1 && document.getElementById('company-name').value.trim() === '') {
+                    alert('Il campo "Nome" azienda è obbligatorio per procedere.');
+                    return;
+                }
+                currentPage++;
+                showPage(currentPage);
+            } else {
+                // Siamo all'ultima pagina, salviamo i dati
+                saveVisit();
+            }
+        });
+
+        const saveVisit = () => {
+            const visitData = {
+                timestamp: new Date().toLocaleString('it-IT'),
+                // Pagina 1
+                companyName: document.getElementById('company-name').value.trim(),
+                companyState: document.getElementById('company-state').value.trim(),
+                companyCity: document.getElementById('company-city').value.trim(),
+                companyAddress: document.getElementById('company-address').value.trim(),
+                division: document.getElementById('division').value.trim(),
+                sector: document.getElementById('sector').value.trim(),
+                typology: document.getElementById('typology').value.trim(),
+                competitors: document.getElementById('competitors').value.trim(),
+                priceSensitivity: document.getElementById('price-sensitivity').value.trim(),
+                expectedVolume: document.getElementById('expected-volume').value.trim(),
+                // Pagina 2
+                contactName: document.getElementById('contact-name').value.trim(),
+                contactSurname: document.getElementById('contact-surname').value.trim(),
+                contactPhone: document.getElementById('contact-phone').value.trim(),
+                contactEmail: document.getElementById('contact-email').value.trim(),
+                contactRole: document.getElementById('contact-role').value.trim(),
+                meetingType: document.getElementById('meeting-type').value.trim(),
+                meetingSubject: document.getElementById('meeting-subject').value.trim(),
+                meetingDate: document.getElementById('meeting-date').value,
+                nextMeetingDate: document.getElementById('next-meeting-date').value,
+                decision: document.getElementById('decision').value.trim(),
+                // Pagina 3
+                notes: document.getElementById('notes').value.trim()
+            };
+
+            allVisits.push(visitData);
+            saveVisitsToLocalStorage();
+            
+            feedbackMessage.textContent = `Report per "${visitData.companyName}" salvato!`;
+            setTimeout(() => feedbackMessage.textContent = '', 4000);
+            
+            reportForm.reset();
+            currentPage = 1;
+            updateUI();
+        };
+
+        exportButton.addEventListener('click', () => {
+            if (allVisits.length === 0) return;
+
+            const headers = [
+                'Data Registrazione', 'Nome Azienda', 'Stato/Regione', 'Città', 'Indirizzo', 'Divisione', 'Settore', 'Tipologia', 'Concorrenti Creati', 'Sensibilità Prezzo', 'Volumi Attesi',
+                'Nome Contatto', 'Cognome Contatto', 'Telefono Contatto', 'Email Contatto', 'Ruolo Contatto', 'Tipo Incontro', 'Oggetto Incontro', 'Data Incontro', 'Prossimo Incontro', 'Decisione',
+                'Note'
+            ];
+
+            const escapeCSV = (field) => {
+                if (field === null || field === undefined) return '';
+                let str = String(field);
+                if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                    str = str.replace(/"/g, '""');
+                    return `"${str}"`;
+                }
+                return str;
+            };
+
+            const csvRows = [headers.join(',')];
+            allVisits.forEach(v => {
+                const row = [
+                    escapeCSV(v.timestamp), escapeCSV(v.companyName), escapeCSV(v.companyState), escapeCSV(v.companyCity), escapeCSV(v.companyAddress), escapeCSV(v.division), escapeCSV(v.sector), escapeCSV(v.typology), escapeCSV(v.competitors), escapeCSV(v.priceSensitivity), escapeCSV(v.expectedVolume),
+                    escapeCSV(v.contactName), escapeCSV(v.contactSurname), escapeCSV(v.contactPhone), escapeCSV(v.contactEmail), escapeCSV(v.contactRole), escapeCSV(v.meetingType), escapeCSV(v.meetingSubject), escapeCSV(v.meetingDate), escapeCSV(v.nextMeetingDate), escapeCSV(v.decision),
+                    escapeCSV(v.notes)
+                ];
+                csvRows.push(row.join(','));
+            });
+
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            const date = new Date().toISOString().slice(0, 10);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `report-visite-commerciali-${date}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+        
+        // Inizializzazione
+        loadVisitsFromLocalStorage();
+        updateUI();
+    });
+    </script>
+</body>
+</html>
