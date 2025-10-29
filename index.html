@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebApp Report Visite</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- NUOVA LIBRERIA PER SCANSIONE QR -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js" xintegrity="sha512-rVFjOMM/c9f3MUPRguCInK7mS2jK0gG4Nq23rTf+vH/cNM/QnkhOEd1T8j1i/M2vG/vPjI31Zk+L8nL23rA2w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -22,9 +24,19 @@
         .page.active {
             display: block;
         }
-        /* Stili per il modale di conferma */
-        #confirmation-modal.hidden {
+        #confirmation-modal.hidden, #qr-scanner-modal.hidden {
             display: none;
+        }
+        .input-error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 2px #fecaca;
+        }
+        /* Stile per lo scanner QR */
+        #qr-reader {
+            width: 100%;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 4px solid #3b82f6;
         }
     </style>
 </head>
@@ -39,6 +51,13 @@
             <form id="report-form" class="space-y-6">
                 <!-- Pagina 1: Dati Azienda -->
                 <div id="page1" class="page active">
+                    <!-- NUOVO PULSANTE SCANNER (SENZA ICONA) -->
+                    <div class="mb-6">
+                        <button type="button" id="btn-scan-qr" class="w-full flex items-center justify-center gap-2 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all shadow-md">
+                            Scansiona QR Code
+                        </button>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="md:col-span-2">
                             <label for="company-name" class="block text-sm font-medium text-gray-600 mb-1">Nome</label>
@@ -97,7 +116,7 @@
                             </datalist>
                         </div>
                         <div>
-                            <label for="competitors" class="block text-sm font-medium text-gray-600 mb-1">Concorrenti Citati</label>
+                            <label for="competitors" class="block text-sm font-medium text-gray-600 mb-1">Concorrenti Creati</label>
                             <input type="text" id="competitors" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
                         </div>
                          <div>
@@ -181,11 +200,18 @@
                     </div>
                 </div>
 
-                <!-- Pagina 3: Note -->
+                <!-- Pagina 3: Note e Cognome Agente -->
                 <div id="page3" class="page">
-                    <div>
-                        <label for="notes" class="block text-sm font-medium text-gray-600 mb-1">Note</label>
-                        <textarea id="notes" rows="12" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Aggiungi qui le tue note strategiche..."></textarea>
+                    <div class="space-y-6">
+                        <div>
+                            <label for="notes" class="block text-sm font-medium text-gray-600 mb-1">Note</label>
+                            <textarea id="notes" rows="10" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Aggiungi qui le tue note strategiche..."></textarea>
+                        </div>
+                        <!-- Campo Cognome Agente MODIFICATO -->
+                        <div>
+                            <label for="agent-name" class="block text-sm font-medium text-gray-600 mb-1">Cognome Agente Comm</label>
+                            <input type="text" id="agent-name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Es. Rossi">
+                        </div>
                     </div>
                 </div>
             </form>
@@ -226,29 +252,76 @@
         </div>
     </div>
 
+    <!-- NUOVO MODALE PER SCANNER QR -->
+    <div id="qr-scanner-modal" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex flex-col items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">Inquadra il QR Code</h3>
+            <div id="qr-reader" class="w-full"></div>
+            <p id="qr-scan-feedback" class="text-center text-gray-600 mt-4"></p>
+        </div>
+        <button id="modal-btn-close-qr" class="bg-white text-gray-800 font-bold py-2 px-6 rounded-full hover:bg-gray-200 transition-all mt-6 shadow-lg">Chiudi Scanner</button>
+    </div>
+
     <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // Riferimenti agli elementi
         const reportForm = document.getElementById('report-form');
         const pageIndicator = document.getElementById('page-indicator');
         const pages = document.querySelectorAll('.page');
         const btnPrev = document.getElementById('btn-prev');
         const btnNext = document.getElementById('btn-next');
-
-        const exportSection = document.getElementById('export-section');
         const exportButton = document.getElementById('export-csv');
-        const clearButton = document.getElementById('clear-data'); // Nuovo pulsante
+        const clearButton = document.getElementById('clear-data');
         const visitCountSpan = document.getElementById('visit-count');
         const feedbackMessage = document.getElementById('feedback-message');
-
-        // Elementi del modale
+        
+        // Modale eliminazione
         const modal = document.getElementById('confirmation-modal');
         const modalVisitCount = document.getElementById('modal-visit-count');
         const modalBtnCancel = document.getElementById('modal-btn-cancel');
         const modalBtnConfirm = document.getElementById('modal-btn-confirm');
+        
+        // Input obbligatori
+        const companyNameInput = document.getElementById('company-name');
+        const agentNameInput = document.getElementById('agent-name'); // Riferimento invariato
+
+        // NUOVI RIFERIMENTI QR
+        const btnScanQr = document.getElementById('btn-scan-qr');
+        const qrModal = document.getElementById('qr-scanner-modal');
+        const qrReaderDiv = document.getElementById('qr-reader');
+        const qrScanFeedback = document.getElementById('qr-scan-feedback');
+        const btnCloseQr = document.getElementById('modal-btn-close-qr');
+        let html5QrCode = null; // Oggetto scanner
+
+        // Mappatura campi
+        const fields = {
+            companyName: document.getElementById('company-name'),
+            companyState: document.getElementById('company-state'),
+            companyCity: document.getElementById('company-city'),
+            companyAddress: document.getElementById('company-address'),
+            division: document.getElementById('division'),
+            sector: document.getElementById('sector'),
+            typology: document.getElementById('typology'),
+            competitors: document.getElementById('competitors'),
+            priceSensitivity: document.getElementById('price-sensitivity'),
+            expectedVolume: document.getElementById('expected-volume'),
+            contactName: document.getElementById('contact-name'),
+            contactSurname: document.getElementById('contact-surname'),
+            contactPhone: document.getElementById('contact-phone'),
+            contactEmail: document.getElementById('contact-email'),
+            contactRole: document.getElementById('contact-role'),
+            meetingType: document.getElementById('meeting-type'),
+            meetingSubject: document.getElementById('meeting-subject'),
+            meetingDate: document.getElementById('meeting-date'),
+            nextMeetingDate: document.getElementById('next-meeting-date'),
+            decision: document.getElementById('decision'),
+            notes: document.getElementById('notes'),
+            agentName: document.getElementById('agent-name') // ID JS invariato
+        };
 
         let currentPage = 1;
         let allVisits = [];
-        const pageTitles = ["Dati Azienda", "Dati Contatto", "Note"];
+        const pageTitles = ["Dati Azienda", "Dati Contatto", "Note e Agente"];
         
         // --- Gestione Storage ---
         const loadVisitsFromLocalStorage = () => {
@@ -262,16 +335,23 @@
             localStorage.setItem('salesReportVisits', JSON.stringify(allVisits));
         };
 
+        // --- Funzione Utility per Feedback Visivo Errore ---
+        const showInputError = (inputElement, message) => {
+            inputElement.classList.add('input-error');
+            const originalPlaceholder = inputElement.placeholder;
+            inputElement.placeholder = message;
+            
+            inputElement.addEventListener('input', () => {
+                inputElement.classList.remove('input-error');
+                inputElement.placeholder = originalPlaceholder;
+            }, { once: true });
+        };
+        
         // --- Aggiornamento UI ---
         const updateUI = () => {
             visitCountSpan.textContent = allVisits.length;
-            if (allVisits.length > 0) {
-                exportButton.disabled = false;
-                clearButton.disabled = false; // Abilita/disabilita anche il tasto "svuota"
-            } else {
-                exportButton.disabled = true;
-                clearButton.disabled = true;
-            }
+            exportButton.disabled = allVisits.length === 0;
+            clearButton.disabled = allVisits.length === 0;
             showPage(currentPage);
         };
 
@@ -294,7 +374,7 @@
             }
         };
         
-        // --- Navigazione Pagine ---
+        // --- Navigazione Pagine e Validazione ---
         btnPrev.addEventListener('click', () => {
             if (currentPage > 1) {
                 currentPage--;
@@ -303,55 +383,35 @@
         });
         
         btnNext.addEventListener('click', () => {
+            // Validazione Pagina 1
+            if (currentPage === 1 && companyNameInput.value.trim() === '') {
+                showInputError(companyNameInput, 'Il campo Nome è obbligatorio');
+                return;
+            }
+
             if (currentPage < 3) {
-                 // Validazione semplice
-                if (currentPage === 1 && document.getElementById('company-name').value.trim() === '') {
-                    // Sostituiamo l'alert con un feedback visivo
-                    const companyNameInput = document.getElementById('company-name');
-                    companyNameInput.classList.add('border-red-500', 'ring-2', 'ring-red-300');
-                    companyNameInput.placeholder = 'Il campo Nome è obbligatorio';
-                    setTimeout(() => {
-                        companyNameInput.classList.remove('border-red-500', 'ring-2', 'ring-red-300');
-                        companyNameInput.placeholder = '';
-                    }, 3000);
-                    return;
-                }
                 currentPage++;
                 showPage(currentPage);
             } else {
+                // Validazione Pagina 3 (Cognome Agente)
+                if (agentNameInput.value.trim() === '') {
+                    showInputError(agentNameInput, 'Il Cognome Agente è obbligatorio');
+                    return;
+                }
                 saveVisit();
             }
         });
 
         // --- Logica di Salvataggio ---
         const saveVisit = () => {
-            const visitData = {
-                timestamp: new Date().toLocaleString('it-IT'),
-                // Pagina 1
-                companyName: document.getElementById('company-name').value.trim(),
-                companyState: document.getElementById('company-state').value.trim(),
-                companyCity: document.getElementById('company-city').value.trim(),
-                companyAddress: document.getElementById('company-address').value.trim(),
-                division: document.getElementById('division').value.trim(),
-                sector: document.getElementById('sector').value.trim(),
-                typology: document.getElementById('typology').value.trim(),
-                competitors: document.getElementById('competitors').value.trim(),
-                priceSensitivity: document.getElementById('price-sensitivity').value.trim(),
-                expectedVolume: document.getElementById('expected-volume').value.trim(),
-                // Pagina 2
-                contactName: document.getElementById('contact-name').value.trim(),
-                contactSurname: document.getElementById('contact-surname').value.trim(),
-                contactPhone: document.getElementById('contact-phone').value.trim(),
-                contactEmail: document.getElementById('contact-email').value.trim(),
-                contactRole: document.getElementById('contact-role').value.trim(),
-                meetingType: document.getElementById('meeting-type').value.trim(),
-                meetingSubject: document.getElementById('meeting-subject').value.trim(),
-                meetingDate: document.getElementById('meeting-date').value,
-                nextMeetingDate: document.getElementById('next-meeting-date').value,
-                decision: document.getElementById('decision').value.trim(),
-                // Pagina 3
-                notes: document.getElementById('notes').value.trim()
-            };
+            const visitData = {};
+            for (const key in fields) {
+                visitData[key] = fields[key].value.trim();
+            }
+            visitData.timestamp = new Date().toLocaleString('it-IT');
+            // Correggi i formati data che escono come stringa vuota
+            visitData.meetingDate = document.getElementById('meeting-date').value;
+            visitData.nextMeetingDate = document.getElementById('next-meeting-date').value;
 
             allVisits.push(visitData);
             saveVisitsToLocalStorage();
@@ -364,30 +424,33 @@
             updateUI();
         };
 
-        // --- Logica di Esportazione ---
+        // --- Logica Esportazione CSV ---
+        const escapeCSV = (field) => {
+            if (field === null || field === undefined) return '';
+            let str = String(field);
+            if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                str = str.replace(/"/g, '""');
+                return `"${str}"`;
+            }
+            return str;
+        };
+
         exportButton.addEventListener('click', () => {
             if (allVisits.length === 0) return;
-
             const headers = [
-                'Data Registrazione', 'Nome Azienda', 'Stato/Regione', 'Città', 'Indirizzo', 'Divisione', 'Settore', 'Tipologia', 'Concorrenti Creati', 'Sensibilità Prezzo', 'Volumi Attesi',
+                'Data Registrazione', 'Cognome Agente Comm', // MODIFICATO
+                // Pagina 1
+                'Nome Azienda', 'Stato/Regione', 'Città', 'Indirizzo', 'Divisione', 'Settore', 'Tipologia', 'Concorrenti Creati', 'Sensibilità Prezzo', 'Volumi Attesi',
+                // Pagina 2
                 'Nome Contatto', 'Cognome Contatto', 'Telefono Contatto', 'Email Contatto', 'Ruolo Contatto', 'Tipo Incontro', 'Oggetto Incontro', 'Data Incontro', 'Prossimo Incontro', 'Decisione',
+                // Pagina 3
                 'Note'
             ];
-
-            const escapeCSV = (field) => {
-                if (field === null || field === undefined) return '';
-                let str = String(field);
-                if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-                    str = str.replace(/"/g, '""');
-                    return `"${str}"`;
-                }
-                return str;
-            };
-
             const csvRows = [headers.join(',')];
             allVisits.forEach(v => {
                 const row = [
-                    escapeCSV(v.timestamp), escapeCSV(v.companyName), escapeCSV(v.companyState), escapeCSV(v.companyCity), escapeCSV(v.companyAddress), escapeCSV(v.division), escapeCSV(v.sector), escapeCSV(v.typology), escapeCSV(v.competitors), escapeCSV(v.priceSensitivity), escapeCSV(v.expectedVolume),
+                    escapeCSV(v.timestamp), escapeCSV(v.agentName),
+                    escapeCSV(v.companyName), escapeCSV(v.companyState), escapeCSV(v.companyCity), escapeCSV(v.companyAddress), escapeCSV(v.division), escapeCSV(v.sector), escapeCSV(v.typology), escapeCSV(v.competitors), escapeCSV(v.priceSensitivity), escapeCSV(v.expectedVolume),
                     escapeCSV(v.contactName), escapeCSV(v.contactSurname), escapeCSV(v.contactPhone), escapeCSV(v.contactEmail), escapeCSV(v.contactRole), escapeCSV(v.meetingType), escapeCSV(v.meetingSubject), escapeCSV(v.meetingDate), escapeCSV(v.nextMeetingDate), escapeCSV(v.decision),
                     escapeCSV(v.notes)
                 ];
@@ -400,36 +463,171 @@
             const link = document.createElement('a');
             const date = new Date().toISOString().slice(0, 10);
             link.setAttribute('href', url);
-            link.setAttribute('download', `report-visite-commerciali-${date}.csv`);
+            link.setAttribute('download', `report-visite-${date}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         });
         
-        // --- NUOVA LOGICA: Svuota Dati ---
-        
-        // Mostra il modale di conferma
+        // --- Logica Svuota Dati (invariata) ---
         clearButton.addEventListener('click', () => {
             if (allVisits.length === 0) return;
             modalVisitCount.textContent = allVisits.length;
             modal.classList.remove('hidden');
         });
-
-        // Annulla l'eliminazione
         modalBtnCancel.addEventListener('click', () => {
             modal.classList.add('hidden');
         });
-
-        // Conferma l'eliminazione
         modalBtnConfirm.addEventListener('click', () => {
             allVisits = [];
             saveVisitsToLocalStorage();
             updateUI();
             modal.classList.add('hidden');
-            
             feedbackMessage.textContent = 'Dati locali eliminati con successo.';
             setTimeout(() => feedbackMessage.textContent = '', 4000);
         });
+
+        // --- NUOVA LOGICA SCANNER QR ---
+
+        // Funzione per chiudere lo scanner e il modale
+        const stopQrScanner = () => {
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().catch(err => console.warn("Errore durante lo stop dello scanner QR:", err));
+            }
+            qrModal.classList.add('hidden');
+            qrScanFeedback.textContent = '';
+        };
+
+        // Apri Modale e Avvia Scanner
+        btnScanQr.addEventListener('click', () => {
+            qrModal.classList.remove('hidden');
+            
+            // Inizializza lo scanner se non già fatto
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("qr-reader");
+            }
+            
+            Html5Qrcode.getCameras().then(devices => {
+                if (devices && devices.length) {
+                    // Usa la fotocamera posteriore (environment-facing) se disponibile
+                    const cameraId = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('posteriore'))?.id || devices[0].id;
+                    
+                    html5QrCode.start(
+                        cameraId, 
+                        {
+                            fps: 10,
+                            qrbox: { width: 250, height: 250 }
+                        },
+                        onScanSuccess,
+                        onScanFailure
+                    ).catch(err => {
+                        console.error("Impossibile avviare lo scanner:", err);
+                        qrScanFeedback.textContent = "Impossibile avviare la fotocamera.";
+                    });
+                }
+            }).catch(err => {
+                console.error("Errore nel trovare fotocamere:", err);
+                qrScanFeedback.textContent = "Nessuna fotocamera trovata.";
+            });
+        });
+        
+        // Chiusura modale
+        btnCloseQr.addEventListener('click', stopQrScanner);
+
+        // Chiamata in caso di successo
+        const onScanSuccess = (decodedText, decodedResult) => {
+            qrScanFeedback.textContent = "Scansione riuscita! Analisi dati...";
+            
+            // Tenta di processare i dati
+            const success = parseVCard(decodedText) || parseJSON(decodedText);
+
+            if (success) {
+                feedbackMessage.textContent = "Dati QR importati con successo!";
+            } else {
+                // Fallback: copia nelle note
+                fields.notes.value = (fields.notes.value ? fields.notes.value + '\n\n' : '') + '--- DATI DA QR CODE ---\n' + decodedText;
+                feedbackMessage.textContent = "Testo QR copiato nelle Note!";
+                currentPage = 3; // Porta l'utente alle note per vedere
+                showPage(3);
+            }
+            
+            stopQrScanner();
+            setTimeout(() => feedbackMessage.textContent = '', 4000);
+        };
+        
+        // Chiamata in caso di fallimento (viene chiamata ad ogni frame senza QR)
+        const onScanFailure = (error) => {
+            // Non fare nulla, serve solo per far funzionare lo scanner
+        };
+
+        // --- Funzioni di Parsing ---
+
+        const parseVCard = (text) => {
+            if (!text.startsWith('BEGIN:VCARD')) return false;
+            
+            let vCardData = {};
+            text.split('\n').forEach(line => {
+                if (line.includes(':')) {
+                    let [key, ...value] = line.split(':');
+                    value = value.join(':');
+                    
+                    // Rimuovi eventuali parametri (es. ;CHARSET=UTF-8)
+                    key = key.split(';')[0].trim();
+                    
+                    vCardData[key] = value.trim();
+                }
+            });
+            
+            // Mappatura vCard -> Campi Form
+            if (vCardData.ORG) fields.companyName.value = vCardData.ORG;
+            
+            if (vCardData.ADR) {
+                // ADR:;;Via Esempio 1;Città;Regione;CAP;Paese
+                const parts = vCardData.ADR.split(';');
+                if (parts[2]) fields.companyAddress.value = parts[2];
+                if (parts[3]) fields.companyCity.value = parts[3];
+                if (parts[4]) fields.companyState.value = parts[4];
+            }
+            
+            if (vCardData.N) {
+                // N:Cognome;Nome
+                const [surname, name] = vCardData.N.split(';');
+                fields.contactSurname.value = surname || '';
+                fields.contactName.value = name || '';
+            } else if (vCardData.FN) {
+                // Fallback se N non c'è, usa FN (Full Name)
+                const nameParts = vCardData.FN.split(' ');
+                fields.contactName.value = nameParts[0];
+                fields.contactSurname.value = nameParts.slice(1).join(' ');
+            }
+            
+            if (vCardData.TEL) fields.contactPhone.value = vCardData.TEL;
+            if (vCardData.EMAIL) fields.contactEmail.value = vCardData.EMAIL;
+            if (vCardData.TITLE) fields.contactRole.value = vCardData.TITLE;
+
+            return true;
+        };
+        
+        const parseJSON = (text) => {
+            try {
+                const data = JSON.parse(text);
+                
+                // Cerca chiavi comuni (con fallback)
+                fields.companyName.value = data.company || data.azienda || data.org || fields.companyName.value;
+                fields.contactName.value = data.name || data.nome || fields.contactName.value;
+                fields.contactSurname.value = data.surname || data.cognome || fields.contactSurname.value;
+                fields.contactEmail.value = data.email || data.mail || fields.contactEmail.value;
+                fields.contactPhone.value = data.phone || data.telefono || data.tel || fields.contactPhone.value;
+                fields.contactRole.value = data.role || data.ruolo || data.title || fields.contactRole.value;
+                fields.companyAddress.value = data.address || data.indirizzo || fields.companyAddress.value;
+                fields.companyCity.value = data.city || data.citta || fields.companyCity.value;
+                fields.companyState.value = data.state || data.regione || fields.companyState.value;
+
+                return true;
+            } catch (e) {
+                return false; // Non era JSON valido
+            }
+        };
 
         // --- Inizializzazione ---
         loadVisitsFromLocalStorage();
@@ -438,5 +636,3 @@
     </script>
 </body>
 </html>
-
-
