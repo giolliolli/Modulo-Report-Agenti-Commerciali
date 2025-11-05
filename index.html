@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebApp Report Visite</title>
     
-    <!-- ICONE AGGIUNTE PER LA HOME SCREEN -->
+    <!-- ICONE PER LA HOME SCREEN -->
     <link rel="icon" href="Logo CERVE WebApp.jpg">
     <link rel="apple-touch-icon" href="Logo CERVE WebApp.jpg">
-    <!-- FINE AGGIUNTA ICONE -->
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- ERRORE CORRETTO: xintegrity -> integrity -->
+    <!-- SCRIPT SCANNER CORRETTO (integrity, non xintegrity) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js" xintegrity="sha512-rVFjOMM/c9f3MUPRguCInK7mS2jK0gG4Nq23rTf+vH/cNM/QnkhOEd1T8j1i/M2vG/vPjI31Zk+L8nL23rA2w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -204,7 +203,7 @@
                             <input type="text" id="meeting-subject" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
                         </div>
                         <div>
-                            <label for="meeting-date" class="block text-sm font-medium text-gray-600 mb-1">Data Incontro</label>
+                            <label for="meeting-date" class="block text-sm font-medium text-gray-600 mb-1">Data Incontro</to>
                             <input type="date" id="meeting-date" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
                         </div>
                         <div>
@@ -359,7 +358,7 @@
             meetingDate: document.getElementById('meeting-date'),
             nextMeetingDate: document.getElementById('next-meeting-date'),
             decision: document.getElementById('decision'),
-notes: document.getElementById('notes'),
+            notes: document.getElementById('notes'),
             agentName: document.getElementById('agent-name')
         };
         
@@ -396,14 +395,24 @@ notes: document.getElementById('notes'),
         
         // --- Gestione Storage ---
         const loadVisitsFromLocalStorage = () => {
-            const storedVisits = localStorage.getItem('salesReportVisits');
-            if (storedVisits) {
-                allVisits = JSON.parse(storedVisits);
+            try {
+                const storedVisits = localStorage.getItem('salesReportVisits');
+                if (storedVisits) {
+                    allVisits = JSON.parse(storedVisits);
+                }
+            } catch (e) {
+                console.error("Errore nel caricare le visite:", e);
+                allVisits = [];
             }
         };
 
         const saveVisitsToLocalStorage = () => {
-            localStorage.setItem('salesReportVisits', JSON.stringify(allVisits));
+            try {
+                localStorage.setItem('salesReportVisits', JSON.stringify(allVisits));
+            } catch (e) {
+                console.error("Errore nel salvare le visite:", e);
+                feedbackMessage.textContent = "Errore: impossibile salvare i dati.";
+            }
         };
 
         // --- Funzione Utility per Feedback Visivo Errore ---
@@ -466,7 +475,7 @@ notes: document.getElementById('notes'),
                 showPage(currentPage);
             } else {
                 if (agentNameInput.value.trim() === '') {
-                    showInputError(agentNameInput, 'Il Cognome Agente è obbligatorio');
+                    showInputError(agentNameInput, 'Cognome Referente è obbligatorio');
                     return;
                 }
                 saveVisit();
@@ -478,13 +487,16 @@ notes: document.getElementById('notes'),
             const visitData = {};
             for (const key in fields) {
                 if (fields[key]) {
-                    visitData[key] = fields[key].value.trim();
+                    // Gestisce i campi data che non devono essere 'trimmati'
+                    if (fields[key].type === 'date') {
+                        visitData[key] = fields[key].value;
+                    } else {
+                        visitData[key] = fields[key].value.trim();
+                    }
                 }
             }
-            visitData.timestamp = new Date().toLocaleString('it-IT');
-            visitData.meetingDate = document.getElementById('meeting-date').value;
-            visitData.nextMeetingDate = document.getElementById('next-meeting-date').value;
-
+            visitData.timestamp = new Date().toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' });
+            
             allVisits.push(visitData);
             saveVisitsToLocalStorage();
             
@@ -500,6 +512,12 @@ notes: document.getElementById('notes'),
         const escapeCSV = (field) => {
             if (field === null || field === undefined) return '';
             let str = String(field);
+            // Pulisce le date per evitare formattazioni strane
+            if (str.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                // Converte YYYY-MM-DD in DD/MM/YYYY per leggibilità in Excel
+                const [y, m, d] = str.split('-');
+                return `${d}/${m}/${y}`;
+            }
             if (str.includes(',') || str.includes('"') || str.includes('\n')) {
                 str = str.replace(/"/g, '""');
                 return `"${str}"`;
@@ -564,10 +582,17 @@ notes: document.getElementById('notes'),
         btnScanQr.addEventListener('click', () => {
             qrModal.classList.remove('hidden');
             if (!html5QrCode) {
-                html5QrCode = new Html5Qrcode("qr-reader");
+                try {
+                    html5QrCode = new Html5Qrcode("qr-reader");
+                } catch (e) {
+                    console.error("Impossibile inizializzare Html5Qrcode:", e);
+                    qrScanFeedback.textContent = "Errore inizializzazione scanner.";
+                    return;
+                }
             }
             Html5Qrcode.getCameras().then(devices => {
                 if (devices && devices.length) {
+                    // Prova a trovare la fotocamera posteriore
                     const cameraId = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('posteriore'))?.id || devices[0].id;
                     html5QrCode.start(
                         cameraId, 
@@ -593,16 +618,19 @@ notes: document.getElementById('notes'),
             if (success) {
                 feedbackMessage.textContent = "Dati QR importati con successo!";
             } else {
+                // Fallback: copia nelle note
                 fields.notes.value = (fields.notes.value ? fields.notes.value + '\n\n' : '') + '--- DATI DA QR CODE ---\n' + decodedText;
                 feedbackMessage.textContent = "Testo QR copiato nelle Note!";
-                currentPage = 3;
+                currentPage = 3; // Vai direttamente alla pagina 3
                 showPage(3);
             }
             stopQrScanner();
             setTimeout(() => feedbackMessage.textContent = '', 4000);
         };
         
-        const onScanFailure = (error) => {};
+        const onScanFailure = (error) => {
+            // Non fare nulla in caso di fallimento (continua a scansionare)
+        };
 
         const parseVCard = (text) => {
             if (!text.startsWith('BEGIN:VCARD')) return false;
@@ -610,8 +638,8 @@ notes: document.getElementById('notes'),
             text.split('\n').forEach(line => {
                 if (line.includes(':')) {
                     let [key, ...value] = line.split(':');
-                    value = value.join(':');
-                    key = key.split(';')[0].trim();
+                    value = value.join(':').replace(/\\,/g, ',').replace(/\\n/g, '\n'); // Pulisce i valori
+                    key = key.split(';')[0].trim().toUpperCase(); // Normalizza la chiave
                     vCardData[key] = value.trim();
                 }
             });
@@ -626,7 +654,7 @@ notes: document.getElementById('notes'),
                 const [surname, name] = vCardData.N.split(';');
                 fields.contactSurname.value = surname || '';
                 fields.contactName.value = name || '';
-            } else if (vCardData.FN) {
+            } else if (vCardData.FN) { // Fallback su Full Name
                 const nameParts = vCardData.FN.split(' ');
                 fields.contactName.value = nameParts[0];
                 fields.contactSurname.value = nameParts.slice(1).join(' ');
@@ -640,18 +668,24 @@ notes: document.getElementById('notes'),
         const parseJSON = (text) => {
             try {
                 const data = JSON.parse(text);
-                fields.companyName.value = data.company || data.azienda || data.org || fields.companyName.value;
-                fields.contactName.value = data.name || data.nome || fields.contactName.value;
-                fields.contactSurname.value = data.surname || data.cognome || fields.contactSurname.value;
-                fields.contactEmail.value = data.email || data.mail || fields.contactEmail.value;
-                fields.contactPhone.value = data.phone || data.telefono || data.tel || fields.contactPhone.value;
-                fields.contactRole.value = data.role || data.ruolo || data.title || fields.contactRole.value;
-                fields.companyAddress.value = data.address || data.indirizzo || fields.companyAddress.value;
-                fields.companyCity.value = data.city || data.citta || fields.companyCity.value;
-                fields.companyState.value = data.state || data.regione || fields.companyState.value;
+                // Cerca chiavi comuni (anche in minuscolo)
+                const lowerData = {};
+                for (const key in data) {
+                    lowerData[key.toLowerCase()] = data[key];
+                }
+                
+                fields.companyName.value = lowerData.company || lowerData.azienda || lowerData.org || fields.companyName.value;
+                fields.contactName.value = lowerData.name || lowerData.nome || lowerData.firstname || fields.contactName.value;
+                fields.contactSurname.value = lowerData.surname || lowerData.cognome || lowerData.lastname || fields.contactSurname.value;
+                fields.contactEmail.value = lowerData.email || lowerData.mail || fields.contactEmail.value;
+                fields.contactPhone.value = lowerData.phone || lowerData.telefono || lowerData.tel || fields.contactPhone.value;
+                fields.contactRole.value = lowerData.role || lowerData.ruolo || lowerData.title || fields.contactRole.value;
+                fields.companyAddress.value = lowerData.address || lowerData.indirizzo || fields.companyAddress.value;
+                fields.companyCity.value = lowerData.city || lowerData.citta || fields.companyCity.value;
+                fields.companyState.value = lowerData.state || lowerData.regione || fields.companyState.value;
                 return true;
             } catch (e) {
-                return false;
+                return false; // Non era JSON valido
             }
         };
 
@@ -664,20 +698,30 @@ notes: document.getElementById('notes'),
             allVisits.forEach((visit, index) => {
                 previewText += `--- VISITA ${index + 1} / ${allVisits.length} ---\n`;
                 
+                // Itera usando il dizionario per mantenere l'ordine
                 for (const key in fieldLabels) {
                     const label = fieldLabels[key];
-                    const value = visit[key];
+                    let value = visit[key];
+                    
+                    // Formatta le date
+                    if (key === 'meetingDate' || key === 'nextMeetingDate') {
+                        if (value) {
+                            const [y, m, d] = value.split('-');
+                            value = `${d}/${m}/${y}`;
+                        }
+                    }
                     
                     if (value !== undefined && value !== null && value !== '') {
                         previewText += `${label}: ${value}\n`;
                     }
                 }
-                previewText += `\n`;
+                previewText += `\n`; // Spazio tra una visita e l'altra
             });
             
             previewContent.textContent = previewText;
             
             previewBox.classList.remove('hidden');
+            // Porta l'utente a vedere l'anteprima
             previewBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
 
