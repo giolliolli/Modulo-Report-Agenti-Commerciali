@@ -4,8 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebApp Report Visite</title>
+    
+    <!-- ICONE AGGIUNTE PER LA HOME SCREEN -->
+    <link rel="icon" href="Logo CERVE WebApp.jpg">
+    <link rel="apple-touch-icon" href="Logo CERVE WebApp.jpg">
+    <!-- FINE AGGIUNTA ICONE -->
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FIX DEFINITIVO: Corretto xintegrity -> integrity (corretto ora) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js" xintegrity="sha512-rVFjOMM/c9f3MUPRguCInK7mS2jK0gG4Nq23rTf+vH/cNM/QnkhOEd1T8j1i/M2vG/vPjI31Zk+L8nL23rA2w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -241,7 +246,7 @@
             </div>
         </main>
         
-        <!-- NUOVA SEZIONE ANTEPRIMA "SEMPLICE" (nascosta) -->
+        <!-- SEZIONE ANTEPRIMA "SEMPLICE" (nascosta) -->
         <div id="preview-box" class="mt-8 bg-white rounded-xl shadow-lg p-6 hidden">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold text-gray-800">Anteprima Dati</h2>
@@ -258,7 +263,6 @@
                 Hai <strong id="visit-count" class="text-blue-600">0</strong> visite salvate sul dispositivo.
             </p>
             
-            <!-- Aggiunto pulsante anteprima e griglia a 3 colonne -->
             <div class="export-group export-group-full">
                 <button id="preview-data" class="bg-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-300 transition-all shadow-md disabled:bg-gray-400" disabled>
                     Vedi Anteprima
@@ -354,11 +358,11 @@
             meetingDate: document.getElementById('meeting-date'),
             nextMeetingDate: document.getElementById('next-meeting-date'),
             decision: document.getElementById('decision'),
-            notes: document.getElementById('notes'),
+notes: document.getElementById('notes'),
             agentName: document.getElementById('agent-name')
         };
         
-        // MODIFICA: Dizionario per tradurre le chiavi in etichette leggibili
+        // Dizionario per tradurre le chiavi in etichette leggibili
         const fieldLabels = {
             timestamp: 'Data Registrazione',
             agentName: 'Cognome Referente Commerciale',
@@ -650,40 +654,35 @@
             }
         };
 
-        // --- MODIFICA: LOGICA ANTEPRIMA "SEMPLICE" ---
+        // --- LOGICA ANTEPRIMA "SEMPLICE" ---
         previewButton.addEventListener('click', () => {
             if (allVisits.length === 0) return;
             
-            // Costruisci una stringa di testo leggibile invece del JSON
             let previewText = '';
             
             allVisits.forEach((visit, index) => {
                 previewText += `--- VISITA ${index + 1} / ${allVisits.length} ---\n`;
                 
-                // Itera sul dizionario delle etichette per mantenere l'ordine
                 for (const key in fieldLabels) {
                     const label = fieldLabels[key];
                     const value = visit[key];
                     
-                    // Mostra solo se il valore esiste ed è non vuoto
                     if (value !== undefined && value !== null && value !== '') {
-                        previewText += `${label}: ${value}\n`; // Formato: Etichetta: Valore
+                        previewText += `${label}: ${value}\n`;
                     }
                 }
-                previewText += `\n`; // Aggiungi uno spazio tra una visita e l'altra
+                previewText += `\n`;
             });
             
-            // Inserisci i dati nel <pre> tag
             previewContent.textContent = previewText;
             
-            // Mostra il box di anteprima e scorri
             previewBox.classList.remove('hidden');
             previewBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
 
         btnClosePreview.addEventListener('click', () => {
             previewBox.classList.add('hidden');
-            previewContent.textContent = ''; // Svuota per pulizia
+            previewContent.textContent = '';
         });
 
         // --- Inizializzazione ---
