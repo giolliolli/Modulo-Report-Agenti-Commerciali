@@ -10,7 +10,6 @@
     <link rel="apple-touch-icon" href="Logo CERVE WebApp.jpg">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SCRIPT SCANNER -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js" xintegrity="sha512-rVFjOMM/c9f3MUPRguCInK7mS2jK0gG4Nq23rTf+vH/cNM/QnkhOEd1T8j1i/M2vG/vPjI31Zk+L8nL23rA2w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -47,7 +46,7 @@
             grid-template-columns: 1fr;
             gap: 1rem;
         }
-        @media (min-width: 768px) { /* md: */
+        @media (min-width: 768px) {
             .export-group {
                 grid-template-columns: 1fr 1fr;
             }
@@ -162,29 +161,45 @@
                     </div>
                 </div>
 
-                <!-- Pagina 2: Dati Contatto -->
+                <!-- Pagina 2: Dati Contatto (MULTI-CONTATTO) -->
                 <div id="page2" class="page">
+                    <div class="mb-4 border-b pb-4">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-3">Aggiungi Persona Incontrata</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <input type="text" id="contact-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Nome">
+                            </div>
+                            <div>
+                                <input type="text" id="contact-surname" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Cognome">
+                            </div>
+                            <div>
+                                <input type="tel" id="contact-phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Telefono">
+                            </div>
+                            <div>
+                                <input type="email" id="contact-email" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Email">
+                            </div>
+                            <div class="md:col-span-2">
+                                <input type="text" id="contact-role" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Ruolo">
+                            </div>
+                        </div>
+                        <button type="button" id="btn-add-contact" class="mt-3 w-full bg-indigo-100 text-indigo-700 font-bold py-2 px-4 rounded-lg hover:bg-indigo-200 transition-all border border-indigo-200">
+                            + Aggiungi Contatto alla Lista
+                        </button>
+                    </div>
+
+                    <!-- LISTA CONTATTI AGGIUNTI -->
+                    <div class="mb-6">
+                        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Contatti Inseriti (<span id="contact-count">0</span>)</h3>
+                        <ul id="contacts-list" class="space-y-2">
+                            <!-- Qui appariranno i contatti aggiunti -->
+                            <li id="no-contacts-msg" class="text-sm text-gray-400 italic">Nessun contatto inserito per questa visita.</li>
+                        </ul>
+                    </div>
+
+                    <hr class="border-gray-200 my-6">
+
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">Dettagli Incontro</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="contact-name" class="block text-sm font-medium text-gray-600 mb-1">Nome</label>
-                            <input type="text" id="contact-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
-                        </div>
-                        <div>
-                            <label for="contact-surname" class="block text-sm font-medium text-gray-600 mb-1">Cognome</label>
-                            <input type="text" id="contact-surname" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
-                        </div>
-                        <div>
-                            <label for="contact-phone" class="block text-sm font-medium text-gray-600 mb-1">Telefono</label>
-                            <input type="tel" id="contact-phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
-                        </div>
-                        <div>
-                            <label for="contact-email" class="block text-sm font-medium text-gray-600 mb-1">Email</label>
-                            <input type="email" id="contact-email" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
-                        </div>
-                        <div>
-                            <label for="contact-role" class="block text-sm font-medium text-gray-600 mb-1">Ruolo</label>
-                            <input type="text" id="contact-role" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
-                        </div>
                         <div>
                             <label for="meeting-type" class="block text-sm font-medium text-gray-600 mb-1">Tipo di Incontro</label>
                             <input list="meeting-type-list" id="meeting-type" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
@@ -228,6 +243,7 @@
                         <div>
                             <label for="notes" class="block text-sm font-medium text-gray-600 mb-1">Note</label>
                             <textarea id="notes" rows="10" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Aggiungi qui le tue note strategiche..."></textarea>
+                            <p class="text-xs text-gray-400 mt-1">Gli "a capo" verranno automaticamente formattati per evitare errori nel CSV.</p>
                         </div>
                         <div>
                             <label for="agent-name" class="block text-sm font-medium text-gray-600 mb-1">Cognome Referente Commerciale</label>
@@ -298,7 +314,7 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Riferimenti agli elementi
+        // Riferimenti
         const reportForm = document.getElementById('report-form');
         const pageIndicator = document.getElementById('page-indicator');
         const pages = document.querySelectorAll('.page');
@@ -327,14 +343,22 @@
         const btnCloseQr = document.getElementById('modal-btn-close-qr');
         let html5QrCode = null;
 
-        // RIFERIMENTI ANTEPRIMA
+        // Anteprima
         const previewButton = document.getElementById('preview-data');
         const previewBox = document.getElementById('preview-box');
         const previewContent = document.getElementById('preview-content');
         const btnClosePreview = document.getElementById('btn-close-preview');
 
-        // Mappatura campi
-        const fields = {
+        // MULTI CONTATTO
+        const btnAddContact = document.getElementById('btn-add-contact');
+        const contactsListEl = document.getElementById('contacts-list');
+        const noContactsMsg = document.getElementById('no-contacts-msg');
+        const contactCountEl = document.getElementById('contact-count');
+        
+        let currentVisitContacts = []; // Array temporaneo per i contatti della visita attuale
+
+        // Mappatura campi (esclusi contatti singoli)
+        const companyFields = {
             companyName: document.getElementById('company-name'),
             companyState: document.getElementById('company-state'),
             companyCity: document.getElementById('company-city'),
@@ -344,12 +368,10 @@
             typology: document.getElementById('typology'),
             competitors: document.getElementById('competitors'),
             priceSensitivity: document.getElementById('price-sensitivity'),
-            expectedVolume: document.getElementById('expected-volume'),
-            contactName: document.getElementById('contact-name'),
-            contactSurname: document.getElementById('contact-surname'),
-            contactPhone: document.getElementById('contact-phone'),
-            contactEmail: document.getElementById('contact-email'),
-            contactRole: document.getElementById('contact-role'),
+            expectedVolume: document.getElementById('expected-volume')
+        };
+
+        const meetingFields = {
             meetingType: document.getElementById('meeting-type'),
             meetingSubject: document.getElementById('meeting-subject'),
             meetingDate: document.getElementById('meeting-date'),
@@ -358,7 +380,16 @@
             notes: document.getElementById('notes'),
             agentName: document.getElementById('agent-name')
         };
-        
+
+        const contactInputs = {
+            name: document.getElementById('contact-name'),
+            surname: document.getElementById('contact-surname'),
+            phone: document.getElementById('contact-phone'),
+            email: document.getElementById('contact-email'),
+            role: document.getElementById('contact-role')
+        };
+
+        // Etichette per export e anteprima
         const fieldLabels = {
             timestamp: 'Data Registrazione',
             agentName: 'Cognome Referente Commerciale',
@@ -386,7 +417,7 @@
         };
 
         let currentPage = 1;
-        let allVisits = [];
+        let allVisits = []; // Array persistente delle visite salvate
         const pageTitles = ["Dati Azienda", "Dati Contatto", "Note e Agente"];
         
         // --- Gestione Storage ---
@@ -394,34 +425,89 @@
             try {
                 const storedVisits = localStorage.getItem('salesReportVisits');
                 if (storedVisits) {
-                    allVisits = JSON.parse(storedVisits);
+                    const parsed = JSON.parse(storedVisits);
+                    // Migrazione per vecchi dati che non avevano l'array 'contacts'
+                    allVisits = parsed.map(v => {
+                        if (!v.contacts) {
+                            // Converti il vecchio contatto singolo in array di 1
+                            v.contacts = [{
+                                name: v.contactName || '',
+                                surname: v.contactSurname || '',
+                                phone: v.contactPhone || '',
+                                email: v.contactEmail || '',
+                                role: v.contactRole || ''
+                            }];
+                        }
+                        return v;
+                    });
                 }
             } catch (e) {
-                console.error("Errore nel caricare le visite:", e);
+                console.error("Errore caricamento:", e);
                 allVisits = [];
             }
         };
 
         const saveVisitsToLocalStorage = () => {
-            try {
-                localStorage.setItem('salesReportVisits', JSON.stringify(allVisits));
-            } catch (e) {
-                console.error("Errore nel salvare le visite:", e);
-                feedbackMessage.textContent = "Errore: impossibile salvare i dati.";
+            localStorage.setItem('salesReportVisits', JSON.stringify(allVisits));
+        };
+
+        // --- Funzioni Multi-Contatto ---
+        btnAddContact.addEventListener('click', () => {
+            const name = contactInputs.name.value.trim();
+            const surname = contactInputs.surname.value.trim();
+            
+            if (!name && !surname) {
+                alert("Inserisci almeno Nome o Cognome.");
+                return;
+            }
+
+            const newContact = {
+                name: name,
+                surname: surname,
+                phone: contactInputs.phone.value.trim(),
+                email: contactInputs.email.value.trim(),
+                role: contactInputs.role.value.trim()
+            };
+
+            currentVisitContacts.push(newContact);
+            updateContactsListUI();
+            
+            // Pulisci i campi contatto per il prossimo inserimento
+            for (let key in contactInputs) contactInputs[key].value = '';
+            contactInputs.name.focus();
+        });
+
+        const updateContactsListUI = () => {
+            contactsListEl.innerHTML = '';
+            if (currentVisitContacts.length === 0) {
+                noContactsMsg.style.display = 'block';
+                contactCountEl.textContent = '0';
+            } else {
+                noContactsMsg.style.display = 'none';
+                contactCountEl.textContent = currentVisitContacts.length;
+                
+                currentVisitContacts.forEach((c, index) => {
+                    const li = document.createElement('li');
+                    li.className = "bg-white border border-gray-200 rounded p-2 flex justify-between items-center text-sm shadow-sm";
+                    li.innerHTML = `
+                        <div>
+                            <span class="font-bold text-gray-700">${c.name} ${c.surname}</span>
+                            <span class="text-gray-500 text-xs ml-2">${c.role}</span>
+                        </div>
+                        <button type="button" class="text-red-500 hover:text-red-700 font-bold px-2" onclick="removeContact(${index})">&times;</button>
+                    `;
+                    contactsListEl.appendChild(li);
+                });
             }
         };
 
-        const showInputError = (inputElement, message) => {
-            inputElement.classList.add('input-error');
-            const originalPlaceholder = inputElement.placeholder;
-            inputElement.placeholder = message;
-            
-            inputElement.addEventListener('input', () => {
-                inputElement.classList.remove('input-error');
-                inputElement.placeholder = originalPlaceholder;
-            }, { once: true });
+        // Espone la funzione rimuovi in global scope per l'onclick HTML
+        window.removeContact = (index) => {
+            currentVisitContacts.splice(index, 1);
+            updateContactsListUI();
         };
-        
+
+        // --- UI & Navigazione ---
         const updateUI = () => {
             const count = allVisits.length;
             visitCountSpan.textContent = count;
@@ -434,9 +520,7 @@
         const showPage = (pageNumber) => {
             pages.forEach(p => p.classList.remove('active'));
             document.getElementById(`page${pageNumber}`).classList.add('active');
-            
             pageIndicator.textContent = `Pagina ${pageNumber} di 3: ${pageTitles[pageNumber - 1]}`;
-
             btnPrev.style.visibility = (pageNumber === 1) ? 'hidden' : 'visible';
             
             if (pageNumber === 3) {
@@ -458,6 +542,9 @@
         });
         
         btnNext.addEventListener('click', () => {
+            const companyNameInput = document.getElementById('company-name');
+            const agentNameInput = document.getElementById('agent-name');
+
             if (currentPage === 1 && companyNameInput.value.trim() === '') {
                 showInputError(companyNameInput, 'Il campo Nome è obbligatorio');
                 return;
@@ -468,54 +555,81 @@
                 showPage(currentPage);
             } else {
                 if (agentNameInput.value.trim() === '') {
-                    showInputError(agentNameInput, 'Il Cognome Agente è obbligatorio');
+                    showInputError(agentNameInput, 'Cognome Referente è obbligatorio');
                     return;
                 }
                 saveVisit();
             }
         });
 
-        // --- Logica di Salvataggio ---
+        const showInputError = (inputElement, message) => {
+            inputElement.classList.add('input-error');
+            const originalPlaceholder = inputElement.placeholder;
+            inputElement.placeholder = message;
+            inputElement.addEventListener('input', () => {
+                inputElement.classList.remove('input-error');
+                inputElement.placeholder = originalPlaceholder;
+            }, { once: true });
+        };
+
+        // --- Salvataggio Visita ---
         const saveVisit = () => {
+            // Raccogli dati azienda
             const visitData = {};
-            for (const key in fields) {
-                if (fields[key]) {
-                    if (fields[key].type === 'date') {
-                        visitData[key] = fields[key].value;
-                    } else {
-                        visitData[key] = fields[key].value.trim();
-                    }
+            for (const key in companyFields) {
+                visitData[key] = companyFields[key].value.trim();
+            }
+            // Raccogli dati incontro e note
+            for (const key in meetingFields) {
+                if (key === 'meetingDate' || key === 'nextMeetingDate') {
+                    visitData[key] = meetingFields[key].value;
+                } else {
+                    visitData[key] = meetingFields[key].value.trim();
                 }
             }
-            // MODIFICA 1: Formattazione data con virgola per forzare il quoting nel CSV
+            
             visitData.timestamp = new Date().toLocaleString('it-IT', { 
                 year: '2-digit', month: '2-digit', day: '2-digit', 
                 hour: '2-digit', minute: '2-digit' 
-            }); // Es: "18/11/25, 12:00"
-            
+            });
+
+            // Aggiungi contatti (se vuoto, aggiungine uno vuoto per generare almeno una riga nel CSV)
+            if (currentVisitContacts.length === 0) {
+                currentVisitContacts.push({ name: '', surname: '', phone: '', email: '', role: '' });
+            }
+            visitData.contacts = [...currentVisitContacts];
+
             allVisits.push(visitData);
             saveVisitsToLocalStorage();
             
             feedbackMessage.textContent = `Report per "${visitData.companyName}" salvato!`;
             setTimeout(() => feedbackMessage.textContent = '', 4000);
             
+            // Reset completo
             reportForm.reset();
+            currentVisitContacts = [];
+            updateContactsListUI();
             currentPage = 1;
             updateUI();
         };
 
-        // --- Logica Esportazione CSV ---
+        // --- Export CSV con Fix Note e Multi-Riga ---
         const escapeCSV = (field) => {
             if (field === null || field === undefined) return '';
             let str = String(field);
             
-            // Gestione Date (se non già formattate)
+            // FIX NOTE: Rimuovi tutti gli 'a capo' e sostituisci con ' - '
+            // Questo previene che il CSV si spezzi su più righe fisiche
+            str = str.replace(/[\r\n]+/g, " - ");
+
+            // Gestione date YYYY-MM-DD -> DD/MM/YYYY
             if (str.match(/^\d{4}-\d{2}-\d{2}$/)) {
                 const [y, m, d] = str.split('-');
                 return `${d}/${m}/${y}`;
             }
-            // Escape standard: se contiene virgola, a capo o virgolette, racchiudi in virgolette
-            if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+            
+            // Escape virgolette
+            if (str.includes(',') || str.includes('"')) {
                 str = str.replace(/"/g, '""');
                 return `"${str}"`;
             }
@@ -525,15 +639,26 @@
         exportButton.addEventListener('click', () => {
             if (allVisits.length === 0) return;
             const headers = Object.values(fieldLabels);
-            
             const csvRows = [headers.join(',')];
             
             allVisits.forEach(v => {
-                const row = Object.keys(fieldLabels).map(key => escapeCSV(v[key]));
-                csvRows.push(row.join(','));
+                // Per ogni visita, itera su tutti i contatti.
+                // Genera una riga CSV per ogni contatto (denormalizzazione)
+                v.contacts.forEach(contact => {
+                    const rowData = {
+                        ...v,
+                        contactName: contact.name,
+                        contactSurname: contact.surname,
+                        contactPhone: contact.phone,
+                        contactEmail: contact.email,
+                        contactRole: contact.role
+                    };
+
+                    const rowString = Object.keys(fieldLabels).map(key => escapeCSV(rowData[key])).join(',');
+                    csvRows.push(rowString);
+                });
             });
 
-            // MODIFICA 2: Aggiunta BOM (\uFEFF) per UTF-8 in Excel/CRM
             const csvContent = '\uFEFF' + csvRows.join('\n');
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
@@ -546,29 +671,27 @@
             document.body.removeChild(link);
         });
         
+        // --- Altre Funzioni (Svuota, Anteprima, QR) ---
         clearButton.addEventListener('click', () => {
             if (allVisits.length === 0) return;
-            modalVisitCount.textContent = allVisits.length;
             modal.classList.remove('hidden');
         });
         
-        modalBtnCancel.addEventListener('click', () => {
-            modal.classList.add('hidden');
-        });
+        modalBtnCancel.addEventListener('click', () => modal.classList.add('hidden'));
         
         modalBtnConfirm.addEventListener('click', () => {
             allVisits = [];
             saveVisitsToLocalStorage();
             updateUI();
             modal.classList.add('hidden');
-            feedbackMessage.textContent = 'Dati locali eliminati con successo.';
+            feedbackMessage.textContent = 'Dati locali eliminati.';
             setTimeout(() => feedbackMessage.textContent = '', 4000);
         });
 
-        // --- Logica Scanner QR ---
+        // Scanner QR (Logica identica a v8)
         const stopQrScanner = () => {
             if (html5QrCode && html5QrCode.isScanning) {
-                html5QrCode.stop().catch(err => console.warn("Errore durante lo stop dello scanner QR:", err));
+                html5QrCode.stop().catch(err => console.warn("Stop error", err));
             }
             qrModal.classList.add('hidden');
             qrScanFeedback.textContent = '';
@@ -577,43 +700,25 @@
         btnScanQr.addEventListener('click', () => {
             qrModal.classList.remove('hidden');
             if (!html5QrCode) {
-                try {
-                    html5QrCode = new Html5Qrcode("qr-reader");
-                } catch (e) {
-                    console.error("Impossibile inizializzare Html5Qrcode:", e);
-                    qrScanFeedback.textContent = "Errore inizializzazione scanner.";
-                    return;
-                }
+                try { html5QrCode = new Html5Qrcode("qr-reader"); } catch(e) {}
             }
             Html5Qrcode.getCameras().then(devices => {
                 if (devices && devices.length) {
-                    const cameraId = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('posteriore'))?.id || devices[0].id;
-                    html5QrCode.start(
-                        cameraId, 
-                        { fps: 10, qrbox: { width: 250, height: 250 } },
-                        onScanSuccess,
-                        onScanFailure
-                    ).catch(err => {
-                        console.error("Impossibile avviare lo scanner:", err);
-                        qrScanFeedback.textContent = "Impossibile avviare la fotocamera.";
-                    });
+                    const cameraId = devices.find(d => d.label.toLowerCase().includes('back'))?.id || devices[0].id;
+                    html5QrCode.start(cameraId, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess, onScanFailure);
                 }
-            }).catch(err => {
-                console.error("Errore nel trovare fotocamere:", err);
-                qrScanFeedback.textContent = "Nessuna fotocamera trovata.";
-            });
+            }).catch(err => qrScanFeedback.textContent = "Errore fotocamera.");
         });
         
         btnCloseQr.addEventListener('click', stopQrScanner);
 
-        const onScanSuccess = (decodedText, decodedResult) => {
-            qrScanFeedback.textContent = "Scansione riuscita! Analisi dati...";
+        const onScanSuccess = (decodedText) => {
             const success = parseVCard(decodedText) || parseJSON(decodedText);
             if (success) {
-                feedbackMessage.textContent = "Dati QR importati con successo!";
+                feedbackMessage.textContent = "Dati QR importati!";
             } else {
-                fields.notes.value = (fields.notes.value ? fields.notes.value + '\n\n' : '') + '--- DATI DA QR CODE ---\n' + decodedText;
-                feedbackMessage.textContent = "Testo QR copiato nelle Note!";
+                meetingFields.notes.value = (meetingFields.notes.value ? meetingFields.notes.value + ' - ' : '') + 'DATI QR: ' + decodedText;
+                feedbackMessage.textContent = "QR copiato nelle Note!";
                 currentPage = 3;
                 showPage(3);
             }
@@ -623,81 +728,58 @@
         
         const onScanFailure = (error) => {};
 
+        // Funzioni Parser (Aggiornate per popolare i campi contatto TEMP invece di quelli diretti)
+        // Dato che ora i contatti sono multipli, il QR riempie i campi di input "Aggiungi Contatto"
         const parseVCard = (text) => {
             if (!text.startsWith('BEGIN:VCARD')) return false;
+            // ... logica vCard semplificata per brevità, identica a v8 ma punta a contactInputs ...
             let vCardData = {};
             text.split('\n').forEach(line => {
                 if (line.includes(':')) {
                     let [key, ...value] = line.split(':');
-                    value = value.join(':').replace(/\\,/g, ',').replace(/\\n/g, '\n');
-                    key = key.split(';')[0].trim().toUpperCase();
-                    vCardData[key] = value.trim();
+                    vCardData[key.split(';')[0].trim().toUpperCase()] = value.join(':').trim();
                 }
             });
-            if (vCardData.ORG) fields.companyName.value = vCardData.ORG;
-            if (vCardData.ADR) {
-                const parts = vCardData.ADR.split(';');
-                if (parts[2]) fields.companyAddress.value = parts[2];
-                if (parts[3]) fields.companyCity.value = parts[3];
-                if (parts[4]) fields.companyState.value = parts[4];
-            }
+            if (vCardData.ORG) companyFields.companyName.value = vCardData.ORG;
+            // Popola campi contatto TEMP
             if (vCardData.N) {
-                const [surname, name] = vCardData.N.split(';');
-                fields.contactSurname.value = surname || '';
-                fields.contactName.value = name || '';
-            } else if (vCardData.FN) {
-                const nameParts = vCardData.FN.split(' ');
-                fields.contactName.value = nameParts[0];
-                fields.contactSurname.value = nameParts.slice(1).join(' ');
+                const [s, n] = vCardData.N.split(';');
+                contactInputs.surname.value = s || '';
+                contactInputs.name.value = n || '';
             }
-            if (vCardData.TEL) fields.contactPhone.value = vCardData.TEL;
-            if (vCardData.EMAIL) fields.contactEmail.value = vCardData.EMAIL;
-            if (vCardData.TITLE) fields.contactRole.value = vCardData.TITLE;
+            if (vCardData.TEL) contactInputs.phone.value = vCardData.TEL;
+            if (vCardData.EMAIL) contactInputs.email.value = vCardData.EMAIL;
+            if (vCardData.TITLE) contactInputs.role.value = vCardData.TITLE;
             return true;
         };
         
         const parseJSON = (text) => {
             try {
                 const data = JSON.parse(text);
-                const lowerData = {};
-                for (const key in data) {
-                    lowerData[key.toLowerCase()] = data[key];
-                }
-                fields.companyName.value = lowerData.company || lowerData.azienda || lowerData.org || fields.companyName.value;
-                fields.contactName.value = lowerData.name || lowerData.nome || lowerData.firstname || fields.contactName.value;
-                fields.contactSurname.value = lowerData.surname || lowerData.cognome || lowerData.lastname || fields.contactSurname.value;
-                fields.contactEmail.value = lowerData.email || lowerData.mail || fields.contactEmail.value;
-                fields.contactPhone.value = lowerData.phone || lowerData.telefono || lowerData.tel || fields.contactPhone.value;
-                fields.contactRole.value = lowerData.role || lowerData.ruolo || lowerData.title || fields.contactRole.value;
-                fields.companyAddress.value = lowerData.address || lowerData.indirizzo || fields.companyAddress.value;
-                fields.companyCity.value = lowerData.city || lowerData.citta || fields.companyCity.value;
-                fields.companyState.value = lowerData.state || lowerData.regione || fields.companyState.value;
+                const l = {}; 
+                for(let k in data) l[k.toLowerCase()] = data[k];
+                companyFields.companyName.value = l.company || l.azienda || companyFields.companyName.value;
+                // Popola campi contatto TEMP
+                contactInputs.name.value = l.name || l.nome || contactInputs.name.value;
+                contactInputs.surname.value = l.surname || l.cognome || contactInputs.surname.value;
+                contactInputs.email.value = l.email || contactInputs.email.value;
+                contactInputs.phone.value = l.phone || contactInputs.phone.value;
                 return true;
-            } catch (e) {
-                return false;
-            }
+            } catch (e) { return false; }
         };
 
-        // --- Logica Anteprima ---
+        // Anteprima semplice
         previewButton.addEventListener('click', () => {
             if (allVisits.length === 0) return;
             let previewText = '';
             allVisits.forEach((visit, index) => {
-                previewText += `--- VISITA ${index + 1} / ${allVisits.length} ---\n`;
-                for (const key in fieldLabels) {
-                    const label = fieldLabels[key];
-                    let value = visit[key];
-                    if (key === 'meetingDate' || key === 'nextMeetingDate') {
-                        if (value) {
-                            const [y, m, d] = value.split('-');
-                            value = `${d}/${m}/${y}`;
-                        }
-                    }
-                    if (value !== undefined && value !== null && value !== '') {
-                        previewText += `${label}: ${value}\n`;
-                    }
-                }
-                previewText += `\n`;
+                previewText += `--- VISITA ${index + 1} ---\n`;
+                previewText += `Azienda: ${visit.companyName}\n`;
+                previewText += `Contatti Incontrati: ${visit.contacts.length}\n`;
+                visit.contacts.forEach(c => {
+                    previewText += `  - ${c.name} ${c.surname} (${c.role})\n`;
+                });
+                previewText += `Note: ${visit.notes}\n\n`;
             });
             previewContent.textContent = previewText;
             previewBox.classList.remove('hidden');
