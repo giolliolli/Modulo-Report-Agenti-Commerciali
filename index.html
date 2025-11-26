@@ -77,16 +77,16 @@
             transition: max-height 0.3s ease-out;
         }
         .accordion-content.open {
-            max-height: 500px; /* Abbastanza alto per contenere le opzioni */
+            max-height: 500px;
             transition: max-height 0.3s ease-in;
-        }
-        .arrow-icon {
-            transition: transform 0.3s;
         }
         .rotate-180 {
             transform: rotate(180deg);
         }
-        /* Custom Select Wrapper per icona */
+        .arrow-icon {
+            transition: transform 0.3s;
+        }
+        /* Custom Select Wrapper */
         .select-wrapper {
             position: relative;
         }
@@ -100,7 +100,7 @@
             height: 0; 
             border-left: 5px solid transparent;
             border-right: 5px solid transparent;
-            border-top: 5px solid #6b7280; /* Gray-500 */
+            border-top: 5px solid #6b7280;
             pointer-events: none;
         }
     </style>
@@ -117,7 +117,7 @@
                 <!-- Pagina 1: Dati Azienda -->
                 <div id="page1" class="page active">
                     
-                    <!-- PULSANTE AGGIORNAMENTO NOTE (Spostato QUI dentro Page 1) -->
+                    <!-- PULSANTE AGGIORNAMENTO NOTE -->
                     <div class="mb-4 flex justify-end">
                         <button type="button" id="btn-open-update-notes" class="text-sm text-blue-600 font-semibold hover:underline flex items-center gap-1">
                             <i data-lucide="edit-2" class="w-4 h-4"></i>
@@ -150,7 +150,7 @@
                             <input type="text" id="company-address" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
                         </div>
                         
-                        <!-- CAMPO DIVISIONE (Accordion Multi-select) -->
+                        <!-- CAMPO DIVISIONE (Accordion) -->
                         <div class="md:col-span-2 border border-gray-300 rounded-lg overflow-hidden">
                             <div class="accordion-header flex justify-between items-center p-3 bg-gray-50" onclick="toggleAccordion('division-content', 'division-arrow')">
                                 <div>
@@ -160,13 +160,11 @@
                                 <i id="division-arrow" data-lucide="chevron-down" class="w-5 h-5 text-gray-500 arrow-icon"></i>
                             </div>
                             <div id="division-content" class="accordion-content bg-white px-3">
-                                <div class="py-3 space-y-2" id="division-container">
-                                    <!-- Checkbox generati via JS -->
-                                </div>
+                                <div class="py-3 space-y-2" id="division-container"></div>
                             </div>
                         </div>
 
-                        <!-- CAMPO CANALE VENDITA (Accordion Multi-select + Custom) -->
+                        <!-- CAMPO CANALE VENDITA (Accordion) -->
                         <div class="md:col-span-2 border border-gray-300 rounded-lg overflow-hidden">
                             <div class="accordion-header flex justify-between items-center p-3 bg-gray-50" onclick="toggleAccordion('channel-content', 'channel-arrow')">
                                 <div>
@@ -176,16 +174,14 @@
                                 <i id="channel-arrow" data-lucide="chevron-down" class="w-5 h-5 text-gray-500 arrow-icon"></i>
                             </div>
                             <div id="channel-content" class="accordion-content bg-white px-3">
-                                <div class="py-3 space-y-2" id="channel-container">
-                                    <!-- Checkbox generati via JS -->
-                                </div>
+                                <div class="py-3 space-y-2" id="channel-container"></div>
                                 <div class="pb-3">
                                     <input type="text" id="custom-channel" class="w-full px-3 py-2 border border-gray-200 rounded text-sm focus:outline-none input-focus" placeholder="Altro (specificare)...">
                                 </div>
                             </div>
                         </div>
 
-                        <!-- CAMPO SETTORE (Accordion Multi-select + Custom) -->
+                        <!-- CAMPO SETTORE (Accordion) -->
                         <div class="md:col-span-2 border border-gray-300 rounded-lg overflow-hidden">
                             <div class="accordion-header flex justify-between items-center p-3 bg-gray-50" onclick="toggleAccordion('sector-content', 'sector-arrow')">
                                 <div>
@@ -195,9 +191,7 @@
                                 <i id="sector-arrow" data-lucide="chevron-down" class="w-5 h-5 text-gray-500 arrow-icon"></i>
                             </div>
                             <div id="sector-content" class="accordion-content bg-white px-3">
-                                <div class="py-3 space-y-2" id="sector-container">
-                                    <!-- Checkbox generati via JS -->
-                                </div>
+                                <div class="py-3 space-y-2" id="sector-container"></div>
                                 <div class="pb-3">
                                     <input type="text" id="custom-sector" class="w-full px-3 py-2 border border-gray-200 rounded text-sm focus:outline-none input-focus" placeholder="Altro (specificare)...">
                                 </div>
@@ -209,14 +203,11 @@
                             <input type="text" id="competitors" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
                         </div>
                          
-                        <!-- Select Wrapper per icona a tendina -->
                         <div class="select-wrapper">
                             <label for="price-sensitivity" class="block text-sm font-medium text-gray-600 mb-1">Sensibilità al Prezzo</label>
                             <input list="price-sensitivity-list" id="price-sensitivity" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus cursor-pointer" placeholder="Seleziona...">
                             <datalist id="price-sensitivity-list">
-                                <option value="Alta"></option>
-                                <option value="Media"></option>
-                                <option value="Bassa"></option>
+                                <option value="Alta"></option><option value="Media"></option><option value="Bassa"></option>
                             </datalist>
                         </div>
                         
@@ -224,9 +215,7 @@
                             <label for="expected-volume" class="block text-sm font-medium text-gray-600 mb-1">Volumi Attesi</label>
                             <input list="expected-volume-list" id="expected-volume" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus cursor-pointer" placeholder="Seleziona...">
                             <datalist id="expected-volume-list">
-                                <option value="Alti"></option>
-                                <option value="Medi"></option>
-                                <option value="Bassi"></option>
+                                <option value="Alti"></option><option value="Medi"></option><option value="Bassi"></option>
                             </datalist>
                         </div>
                     </div>
@@ -387,15 +376,15 @@
         // Inizializza icone Lucide
         lucide.createIcons();
 
-        // Espone toggleAccordion globalmente per onclick
+        // Espone toggleAccordion globalmente
         window.toggleAccordion = (contentId, arrowId) => {
             const content = document.getElementById(contentId);
             const arrow = document.getElementById(arrowId);
             if (content.style.maxHeight) {
-                content.style.maxHeight = null; // Chiudi
+                content.style.maxHeight = null;
                 arrow.classList.remove('rotate-180');
             } else {
-                content.style.maxHeight = content.scrollHeight + "px"; // Apri
+                content.style.maxHeight = content.scrollHeight + "px";
                 arrow.classList.add('rotate-180');
             }
         };
@@ -413,14 +402,12 @@
             items.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'checkbox-item flex items-center gap-2';
-                const id = `${name}-${item.replace(/[^a-zA-Z0-9]/g, '')}`; // ID sicuro
+                const id = `${name}-${item.replace(/[^a-zA-Z0-9]/g, '')}`; 
                 div.innerHTML = `
                     <input type="checkbox" id="${id}" value="${item}" name="${name}" class="rounded text-blue-600 focus:ring-blue-500">
                     <label for="${id}" class="text-gray-700 text-sm cursor-pointer select-none flex-1">${item}</label>
                 `;
                 container.appendChild(div);
-                
-                // Listener per aggiornare il sommario
                 const checkbox = div.querySelector('input');
                 checkbox.addEventListener('change', () => updateSummary(name, summaryId));
             });
@@ -429,7 +416,6 @@
         const updateSummary = (name, summaryId) => {
             const checked = Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
             const summaryEl = document.getElementById(summaryId);
-            // Se c'è un campo custom (solo per channel e sector), aggiungilo
             let customVal = '';
             if (name === 'channel') customVal = document.getElementById('custom-channel').value.trim();
             if (name === 'sector') customVal = document.getElementById('custom-sector').value.trim();
@@ -451,7 +437,6 @@
         generateCheckboxes('channel-container', channels, 'channel', 'channel-summary');
         generateCheckboxes('sector-container', sectors, 'sector', 'sector-summary');
 
-        // Listener per input custom per aggiornare sommario live
         document.getElementById('custom-channel').addEventListener('input', () => updateSummary('channel', 'channel-summary'));
         document.getElementById('custom-sector').addEventListener('input', () => updateSummary('sector', 'sector-summary'));
 
@@ -508,7 +493,7 @@
         let currentVisitContacts = [];
         const pageTitles = ["Dati Azienda", "Dati Contatto", "Note e Agente"];
 
-        // --- MAPPIAMO I CAMPI (Esclusi Checkbox, Custom e Contatti) ---
+        // --- MAPPIAMO I CAMPI ---
         const companyFields = {
             companyName: document.getElementById('company-name'),
             companyState: document.getElementById('company-state'),
@@ -799,10 +784,20 @@
         modalBtnCancel.addEventListener('click', () => modalConfirm.classList.add('hidden'));
         modalBtnConfirm.addEventListener('click', () => { allVisits=[]; saveVisits(); updateUI(); modalConfirm.classList.add('hidden'); });
 
-        const onScanSuccess = (text) => {
-            companyFields.companyName.value = text; 
-            feedbackMessage.textContent = "QR Letto (Dati Grezzi inseriti in Nome)";
+        const onScanSuccess = (decodedText, decodedResult) => {
+            // RESTORED SMART LOGIC HERE
+            const success = parseVCard(decodedText) || parseJSON(decodedText);
+            if (success) {
+                feedbackMessage.textContent = "Dati QR importati con successo!";
+            } else {
+                // Fallback
+                fields.notes.value = (fields.notes.value ? fields.notes.value + '\n\n' : '') + '--- DATI DA QR CODE ---\n' + decodedText;
+                feedbackMessage.textContent = "Testo QR copiato nelle Note!";
+                currentPage = 3;
+                showPage(3);
+            }
             stopQr();
+            setTimeout(() => feedbackMessage.textContent = '', 4000);
         };
         const stopQr = () => { if(html5QrCode) html5QrCode.stop().catch(()=>{}); qrModal.classList.add('hidden'); };
         
@@ -813,9 +808,68 @@
         });
         btnCloseQr.addEventListener('click', stopQr);
 
+        // PARSING FUNCTIONS RESTORED
+        const parseVCard = (text) => {
+            if (!text.startsWith('BEGIN:VCARD')) return false;
+            let vCardData = {};
+            // Robust split for different newline types
+            text.split(/\r\n|\r|\n/).forEach(line => {
+                if (line.includes(':')) {
+                    let [key, ...value] = line.split(':');
+                    value = value.join(':').replace(/\\,/g, ',').replace(/\\n/g, '\n');
+                    key = key.split(';')[0].trim().toUpperCase();
+                    vCardData[key] = value.trim();
+                }
+            });
+            if (vCardData.ORG) companyFields.companyName.value = vCardData.ORG;
+            if (vCardData.ADR) {
+                const parts = vCardData.ADR.split(';');
+                if (parts[2]) companyFields.companyAddress.value = parts[2];
+                if (parts[3]) companyFields.companyCity.value = parts[3];
+                if (parts[4]) companyFields.companyState.value = parts[4];
+            }
+            // Populate first contact fields in multi-contact list input area
+            if (vCardData.N) {
+                const [surname, name] = vCardData.N.split(';');
+                contactInputs.surname.value = surname || '';
+                contactInputs.name.value = name || '';
+            } else if (vCardData.FN) {
+                const nameParts = vCardData.FN.split(' ');
+                contactInputs.name.value = nameParts[0];
+                contactInputs.surname.value = nameParts.slice(1).join(' ');
+            }
+            if (vCardData.TEL) contactInputs.phone.value = vCardData.TEL;
+            if (vCardData.EMAIL) contactInputs.email.value = vCardData.EMAIL;
+            if (vCardData.TITLE) contactInputs.role.value = vCardData.TITLE;
+            return true;
+        };
+        
+        const parseJSON = (text) => {
+            try {
+                const data = JSON.parse(text);
+                const lowerData = {};
+                for (const key in data) lowerData[key.toLowerCase()] = data[key];
+                
+                companyFields.companyName.value = lowerData.company || lowerData.azienda || lowerData.org || companyFields.companyName.value;
+                companyFields.companyAddress.value = lowerData.address || lowerData.indirizzo || companyFields.companyAddress.value;
+                companyFields.companyCity.value = lowerData.city || lowerData.citta || companyFields.companyCity.value;
+                companyFields.companyState.value = lowerData.state || lowerData.regione || companyFields.companyState.value;
+
+                contactInputs.name.value = lowerData.name || lowerData.nome || contactInputs.name.value;
+                contactInputs.surname.value = lowerData.surname || lowerData.cognome || contactInputs.surname.value;
+                contactInputs.email.value = lowerData.email || contactInputs.email.value;
+                contactInputs.phone.value = lowerData.phone || contactInputs.phone.value;
+                return true;
+            } catch (e) {
+                return false;
+            }
+        };
+
         loadVisits();
         updateUI();
     });
     </script>
 </body>
 </html>
+</html>
+
