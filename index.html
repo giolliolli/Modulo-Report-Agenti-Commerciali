@@ -14,6 +14,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icone Lucide (leggere e moderne) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -28,7 +30,7 @@
         .page.active {
             display: block;
         }
-        #confirmation-modal.hidden, #qr-scanner-modal.hidden, #preview-box.hidden {
+        #confirmation-modal.hidden, #qr-scanner-modal.hidden, #preview-box.hidden, #update-notes-modal.hidden {
             display: none;
         }
         .input-error {
@@ -60,6 +62,47 @@
             font-family: Consolas, 'Courier New', monospace;
             line-height: 1.6;
         }
+        /* Accordion Styles */
+        .accordion-header {
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+        .accordion-header:hover {
+            background-color: #f3f4f6;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .accordion-content.open {
+            max-height: 500px; /* Abbastanza alto per contenere le opzioni */
+            transition: max-height 0.3s ease-in;
+        }
+        .arrow-icon {
+            transition: transform 0.3s;
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        /* Custom Select Wrapper per icona */
+        .select-wrapper {
+            position: relative;
+        }
+        .select-wrapper::after {
+            content: '';
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0; 
+            height: 0; 
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #6b7280; /* Gray-500 */
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -73,15 +116,25 @@
             <form id="report-form" class="space-y-6">
                 <!-- Pagina 1: Dati Azienda -->
                 <div id="page1" class="page active">
+                    
+                    <!-- PULSANTE AGGIORNAMENTO NOTE (Spostato QUI dentro Page 1) -->
+                    <div class="mb-4 flex justify-end">
+                        <button type="button" id="btn-open-update-notes" class="text-sm text-blue-600 font-semibold hover:underline flex items-center gap-1">
+                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            Aggiorna Note Azienda Esistente
+                        </button>
+                    </div>
+
                     <div class="mb-6">
                         <button type="button" id="btn-scan-qr" class="w-full flex items-center justify-center gap-2 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all shadow-md">
+                            <i data-lucide="qr-code" class="w-5 h-5"></i>
                             Scansiona QR Code
                         </button>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="md:col-span-2">
-                            <label for="company-name" class="block text-sm font-medium text-gray-600 mb-1">Nome</label>
+                            <label for="company-name" class="block text-sm font-medium text-gray-600 mb-1">Nome Azienda</label>
                             <input type="text" id="company-name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
                         </div>
                         <div>
@@ -97,61 +150,79 @@
                             <input type="text" id="company-address" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
                         </div>
                         
-                        <!-- Campi con Datalist -->
-                        <div>
-                            <label for="division" class="block text-sm font-medium text-gray-600 mb-1">Divisione</label>
-                            <input list="division-list" id="division" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
-                            <datalist id="division-list">
-                                <option value="VidiVi Italia"></option>
-                                <option value="VidiVi Estero"></option>
-                                <option value="Casalingo Italia"></option>
-                                <option value="Casalingo Estero"></option>
-                                <option value="B2B Italia"></option>
-                                <option value="B2B Estero"></option>
-                            </datalist>
+                        <!-- CAMPO DIVISIONE (Accordion Multi-select) -->
+                        <div class="md:col-span-2 border border-gray-300 rounded-lg overflow-hidden">
+                            <div class="accordion-header flex justify-between items-center p-3 bg-gray-50" onclick="toggleAccordion('division-content', 'division-arrow')">
+                                <div>
+                                    <span class="text-sm font-medium text-gray-700">Divisione</span>
+                                    <p id="division-summary" class="text-xs text-gray-500 mt-1 truncate max-w-xs">Nessuna selezionata</p>
+                                </div>
+                                <i id="division-arrow" data-lucide="chevron-down" class="w-5 h-5 text-gray-500 arrow-icon"></i>
+                            </div>
+                            <div id="division-content" class="accordion-content bg-white px-3">
+                                <div class="py-3 space-y-2" id="division-container">
+                                    <!-- Checkbox generati via JS -->
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label for="sector" class="block text-sm font-medium text-gray-600 mb-1">Settore</label>
-                            <input list="sector-list" id="sector" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
-                            <datalist id="sector-list">
-                                <option value="Vario"></option>
-                                <option value="Soft Drinks"></option>
-                                <option value="Cantina"></option>
-                                <option value="Birreria"></option>
-                                <option value="Bar"></option>
-                                <option value="Distilleria"></option>
-                                <option value="Gelateria"></option>
-                            </datalist>
+
+                        <!-- CAMPO CANALE VENDITA (Accordion Multi-select + Custom) -->
+                        <div class="md:col-span-2 border border-gray-300 rounded-lg overflow-hidden">
+                            <div class="accordion-header flex justify-between items-center p-3 bg-gray-50" onclick="toggleAccordion('channel-content', 'channel-arrow')">
+                                <div>
+                                    <span class="text-sm font-medium text-gray-700">Canale di Vendita</span>
+                                    <p id="channel-summary" class="text-xs text-gray-500 mt-1 truncate max-w-xs">Nessuna selezionata</p>
+                                </div>
+                                <i id="channel-arrow" data-lucide="chevron-down" class="w-5 h-5 text-gray-500 arrow-icon"></i>
+                            </div>
+                            <div id="channel-content" class="accordion-content bg-white px-3">
+                                <div class="py-3 space-y-2" id="channel-container">
+                                    <!-- Checkbox generati via JS -->
+                                </div>
+                                <div class="pb-3">
+                                    <input type="text" id="custom-channel" class="w-full px-3 py-2 border border-gray-200 rounded text-sm focus:outline-none input-focus" placeholder="Altro (specificare)...">
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label for="typology" class="block text-sm font-medium text-gray-600 mb-1">Tipologia</label>
-                            <input list="typology-list" id="typology" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
-                            <datalist id="typology-list">
-                                <option value="GDS"></option>
-                                <option value="GDO"></option>
-                                <option value="Dettaglio"></option>
-                                <option value="Promozioni Aziendali"></option>
-                                <option value="Grossista"></option>
-                                <option value="Ho.Re.Ca."></option>
-                                <option value="E-commerce"></option>
-                            </datalist>
+
+                        <!-- CAMPO SETTORE (Accordion Multi-select + Custom) -->
+                        <div class="md:col-span-2 border border-gray-300 rounded-lg overflow-hidden">
+                            <div class="accordion-header flex justify-between items-center p-3 bg-gray-50" onclick="toggleAccordion('sector-content', 'sector-arrow')">
+                                <div>
+                                    <span class="text-sm font-medium text-gray-700">Settore</span>
+                                    <p id="sector-summary" class="text-xs text-gray-500 mt-1 truncate max-w-xs">Nessuna selezionata</p>
+                                </div>
+                                <i id="sector-arrow" data-lucide="chevron-down" class="w-5 h-5 text-gray-500 arrow-icon"></i>
+                            </div>
+                            <div id="sector-content" class="accordion-content bg-white px-3">
+                                <div class="py-3 space-y-2" id="sector-container">
+                                    <!-- Checkbox generati via JS -->
+                                </div>
+                                <div class="pb-3">
+                                    <input type="text" id="custom-sector" class="w-full px-3 py-2 border border-gray-200 rounded text-sm focus:outline-none input-focus" placeholder="Altro (specificare)...">
+                                </div>
+                            </div>
                         </div>
+                        
                         <div>
                             <label for="competitors" class="block text-sm font-medium text-gray-600 mb-1">Concorrenti Citati</label>
                             <input type="text" id="competitors" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
                         </div>
-                         <div>
+                         
+                        <!-- Select Wrapper per icona a tendina -->
+                        <div class="select-wrapper">
                             <label for="price-sensitivity" class="block text-sm font-medium text-gray-600 mb-1">Sensibilità al Prezzo</label>
-                            <input list="price-sensitivity-list" id="price-sensitivity" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                            <input list="price-sensitivity-list" id="price-sensitivity" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus cursor-pointer" placeholder="Seleziona...">
                             <datalist id="price-sensitivity-list">
                                 <option value="Alta"></option>
                                 <option value="Media"></option>
                                 <option value="Bassa"></option>
                             </datalist>
                         </div>
-                         <div>
+                        
+                        <div class="select-wrapper">
                             <label for="expected-volume" class="block text-sm font-medium text-gray-600 mb-1">Volumi Attesi</label>
-                            <input list="expected-volume-list" id="expected-volume" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                            <input list="expected-volume-list" id="expected-volume" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus cursor-pointer" placeholder="Seleziona...">
                             <datalist id="expected-volume-list">
                                 <option value="Alti"></option>
                                 <option value="Medi"></option>
@@ -161,38 +232,28 @@
                     </div>
                 </div>
 
-                <!-- Pagina 2: Dati Contatto (MULTI-CONTATTO) -->
+                <!-- Pagina 2: Dati Contatto -->
                 <div id="page2" class="page">
                     <div class="mb-4 border-b pb-4">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-3">Aggiungi Persona Incontrata</h3>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                            <i data-lucide="user-plus" class="w-5 h-5"></i> Aggiungi Persona
+                        </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <input type="text" id="contact-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Nome">
-                            </div>
-                            <div>
-                                <input type="text" id="contact-surname" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Cognome">
-                            </div>
-                            <div>
-                                <input type="tel" id="contact-phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Telefono">
-                            </div>
-                            <div>
-                                <input type="email" id="contact-email" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Email">
-                            </div>
-                            <div class="md:col-span-2">
-                                <input type="text" id="contact-role" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Ruolo">
-                            </div>
+                            <div><input type="text" id="contact-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Nome"></div>
+                            <div><input type="text" id="contact-surname" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Cognome"></div>
+                            <div><input type="tel" id="contact-phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Telefono"></div>
+                            <div><input type="email" id="contact-email" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Email"></div>
+                            <div class="md:col-span-2"><input type="text" id="contact-role" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Ruolo"></div>
                         </div>
-                        <button type="button" id="btn-add-contact" class="mt-3 w-full bg-indigo-100 text-indigo-700 font-bold py-2 px-4 rounded-lg hover:bg-indigo-200 transition-all border border-indigo-200">
-                            + Aggiungi Contatto alla Lista
+                        <button type="button" id="btn-add-contact" class="mt-3 w-full bg-indigo-50 text-indigo-700 font-bold py-2 px-4 rounded-lg hover:bg-indigo-100 transition-all border border-indigo-200 flex justify-center items-center gap-2">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i> Aggiungi alla Lista
                         </button>
                     </div>
 
-                    <!-- LISTA CONTATTI AGGIUNTI -->
                     <div class="mb-6">
                         <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Contatti Inseriti (<span id="contact-count">0</span>)</h3>
                         <ul id="contacts-list" class="space-y-2">
-                            <!-- Qui appariranno i contatti aggiunti -->
-                            <li id="no-contacts-msg" class="text-sm text-gray-400 italic">Nessun contatto inserito per questa visita.</li>
+                            <li id="no-contacts-msg" class="text-sm text-gray-400 italic">Nessun contatto inserito.</li>
                         </ul>
                     </div>
 
@@ -200,15 +261,11 @@
 
                     <h3 class="text-lg font-semibold text-gray-700 mb-3">Dettagli Incontro</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
+                        <div class="select-wrapper">
                             <label for="meeting-type" class="block text-sm font-medium text-gray-600 mb-1">Tipo di Incontro</label>
-                            <input list="meeting-type-list" id="meeting-type" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
+                            <input list="meeting-type-list" id="meeting-type" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus cursor-pointer" placeholder="Seleziona...">
                             <datalist id="meeting-type-list">
-                                <option value="Visita"></option>
-                                <option value="Chiamata"></option>
-                                <option value="Email"></option>
-                                <option value="Fiera"></option>
-                                <option value="Evento"></option>
+                                <option value="Visita"></option><option value="Chiamata"></option><option value="Email"></option><option value="Fiera"></option><option value="Evento"></option>
                             </datalist>
                         </div>
                         <div class="md:col-span-2">
@@ -223,17 +280,6 @@
                             <label for="next-meeting-date" class="block text-sm font-medium text-gray-600 mb-1">Prossimo Incontro</label>
                             <input type="date" id="next-meeting-date" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
                         </div>
-                         <div class="md:col-span-2">
-                            <label for="decision" class="block text-sm font-medium text-gray-600 mb-1">Decisione</label>
-                            <input list="decision-list" id="decision" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
-                            <datalist id="decision-list">
-                                <option value="In Attesa"></option>
-                                <option value="Follow-Up"></option>
-                                <option value="Online Immediato"></option>
-                                <option value="Opportunità"></option>
-                                <option value="Richiede Campionatura"></option>
-                            </datalist>
-                        </div>
                     </div>
                 </div>
 
@@ -243,7 +289,6 @@
                         <div>
                             <label for="notes" class="block text-sm font-medium text-gray-600 mb-1">Note</label>
                             <textarea id="notes" rows="10" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus" placeholder="Aggiungi qui le tue note strategiche..."></textarea>
-                            <p class="text-xs text-gray-400 mt-1">Gli "a capo" verranno automaticamente formattati per evitare errori nel CSV.</p>
                         </div>
                         <div>
                             <label for="agent-name" class="block text-sm font-medium text-gray-600 mb-1">Cognome Referente Commerciale</label>
@@ -290,14 +335,40 @@
         </div>
     </div>
 
-    <!-- Modale di Conferma Eliminazione -->
+    <!-- Modale Aggiorna Note -->
+    <div id="update-notes-modal" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Aggiorna Note Azienda</h3>
+            <p class="text-sm text-gray-500 mb-4">Inserisci il nome dell'azienda già visitata e le nuove note da aggiungere.</p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Nome Azienda (Esatto)</label>
+                    <input type="text" id="update-company-name" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Nuove Note</label>
+                    <textarea id="update-notes-text" rows="5" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Il tuo Cognome</label>
+                    <input type="text" id="update-agent-name" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button id="btn-cancel-update" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Annulla</button>
+                <button id="btn-confirm-update" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold">Salva Aggiornamento</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Conferma Eliminazione -->
     <div id="confirmation-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full">
             <h3 class="text-xl font-bold text-gray-800 mb-4">Conferma Eliminazione</h3>
-            <p class="text-gray-600 mb-6">Sei sicuro di voler eliminare <strong id="modal-visit-count">0</strong> visite salvate? L'operazione non è reversibile.</p>
+            <p class="text-gray-600 mb-6">Sei sicuro di voler eliminare <strong id="modal-visit-count">0</strong> visite salvate?</p>
             <div class="flex justify-end space-x-4">
-                <button id="modal-btn-cancel" class="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition-all">Annulla</button>
-                <button id="modal-btn-confirm" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition-all">Conferma ed Elimina</button>
+                <button id="modal-btn-cancel" class="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600">Annulla</button>
+                <button id="modal-btn-confirm" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700">Elimina</button>
             </div>
         </div>
     </div>
@@ -313,8 +384,78 @@
     </div>
 
     <script>
+        // Inizializza icone Lucide
+        lucide.createIcons();
+
+        // Espone toggleAccordion globalmente per onclick
+        window.toggleAccordion = (contentId, arrowId) => {
+            const content = document.getElementById(contentId);
+            const arrow = document.getElementById(arrowId);
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null; // Chiudi
+                arrow.classList.remove('rotate-180');
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px"; // Apri
+                arrow.classList.add('rotate-180');
+            }
+        };
+
     document.addEventListener('DOMContentLoaded', () => {
-        // Riferimenti
+        // --- DATI PER MULTI-SELECT ---
+        const divisions = ["VidiVi Italia", "VidiVi Estero", "Casalingo Italia", "Casalingo Estero", "B2B Italia", "B2B Estero"];
+        const channels = ["GDS", "GDO", "Dettaglio", "Promozioni Aziendali", "Grossista", "Ho.Re.Ca.", "E-commerce", "Produttore"];
+        const sectors = ["Vario", "Soft Drinks", "Cantina", "Birreria", "Bar", "Distilleria", "Gelateria"];
+
+        // --- GENERAZIONE CHECKBOX ---
+        const generateCheckboxes = (containerId, items, name, summaryId) => {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-item flex items-center gap-2';
+                const id = `${name}-${item.replace(/[^a-zA-Z0-9]/g, '')}`; // ID sicuro
+                div.innerHTML = `
+                    <input type="checkbox" id="${id}" value="${item}" name="${name}" class="rounded text-blue-600 focus:ring-blue-500">
+                    <label for="${id}" class="text-gray-700 text-sm cursor-pointer select-none flex-1">${item}</label>
+                `;
+                container.appendChild(div);
+                
+                // Listener per aggiornare il sommario
+                const checkbox = div.querySelector('input');
+                checkbox.addEventListener('change', () => updateSummary(name, summaryId));
+            });
+        };
+
+        const updateSummary = (name, summaryId) => {
+            const checked = Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
+            const summaryEl = document.getElementById(summaryId);
+            // Se c'è un campo custom (solo per channel e sector), aggiungilo
+            let customVal = '';
+            if (name === 'channel') customVal = document.getElementById('custom-channel').value.trim();
+            if (name === 'sector') customVal = document.getElementById('custom-sector').value.trim();
+            
+            if (customVal) checked.push(customVal);
+
+            if (checked.length > 0) {
+                summaryEl.textContent = checked.join(', ');
+                summaryEl.classList.remove('text-gray-500');
+                summaryEl.classList.add('text-blue-600', 'font-medium');
+            } else {
+                summaryEl.textContent = 'Nessuna selezionata';
+                summaryEl.classList.add('text-gray-500');
+                summaryEl.classList.remove('text-blue-600', 'font-medium');
+            }
+        };
+
+        generateCheckboxes('division-container', divisions, 'division', 'division-summary');
+        generateCheckboxes('channel-container', channels, 'channel', 'channel-summary');
+        generateCheckboxes('sector-container', sectors, 'sector', 'sector-summary');
+
+        // Listener per input custom per aggiornare sommario live
+        document.getElementById('custom-channel').addEventListener('input', () => updateSummary('channel', 'channel-summary'));
+        document.getElementById('custom-sector').addEventListener('input', () => updateSummary('sector', 'sector-summary'));
+
+        // --- RIFERIMENTI DOM ---
         const reportForm = document.getElementById('report-form');
         const pageIndicator = document.getElementById('page-indicator');
         const pages = document.querySelectorAll('.page');
@@ -324,18 +465,31 @@
         const clearButton = document.getElementById('clear-data');
         const visitCountSpan = document.getElementById('visit-count');
         const feedbackMessage = document.getElementById('feedback-message');
+        const companyNameInput = document.getElementById('company-name');
+        const agentNameInput = document.getElementById('agent-name');
+
+        // Custom inputs
+        const customChannelInput = document.getElementById('custom-channel');
+        const customSectorInput = document.getElementById('custom-sector');
+
+        // Multi Contatto
+        const btnAddContact = document.getElementById('btn-add-contact');
+        const contactsListEl = document.getElementById('contacts-list');
+        const noContactsMsg = document.getElementById('no-contacts-msg');
+        const contactCountEl = document.getElementById('contact-count');
         
-        // Modale eliminazione
-        const modal = document.getElementById('confirmation-modal');
+        // Modali
+        const modalConfirm = document.getElementById('confirmation-modal');
         const modalVisitCount = document.getElementById('modal-visit-count');
         const modalBtnCancel = document.getElementById('modal-btn-cancel');
         const modalBtnConfirm = document.getElementById('modal-btn-confirm');
         
-        // Input obbligatori
-        const companyNameInput = document.getElementById('company-name');
-        const agentNameInput = document.getElementById('agent-name');
+        const modalUpdate = document.getElementById('update-notes-modal');
+        const btnOpenUpdate = document.getElementById('btn-open-update-notes');
+        const btnCancelUpdate = document.getElementById('btn-cancel-update');
+        const btnConfirmUpdate = document.getElementById('btn-confirm-update');
 
-        // Scanner QR
+        // QR
         const btnScanQr = document.getElementById('btn-scan-qr');
         const qrModal = document.getElementById('qr-scanner-modal');
         const qrReaderDiv = document.getElementById('qr-reader');
@@ -349,23 +503,17 @@
         const previewContent = document.getElementById('preview-content');
         const btnClosePreview = document.getElementById('btn-close-preview');
 
-        // MULTI CONTATTO
-        const btnAddContact = document.getElementById('btn-add-contact');
-        const contactsListEl = document.getElementById('contacts-list');
-        const noContactsMsg = document.getElementById('no-contacts-msg');
-        const contactCountEl = document.getElementById('contact-count');
-        
-        let currentVisitContacts = []; // Array temporaneo per i contatti della visita attuale
+        let currentPage = 1;
+        let allVisits = [];
+        let currentVisitContacts = [];
+        const pageTitles = ["Dati Azienda", "Dati Contatto", "Note e Agente"];
 
-        // Mappatura campi (esclusi contatti singoli)
+        // --- MAPPIAMO I CAMPI (Esclusi Checkbox, Custom e Contatti) ---
         const companyFields = {
             companyName: document.getElementById('company-name'),
             companyState: document.getElementById('company-state'),
             companyCity: document.getElementById('company-city'),
             companyAddress: document.getElementById('company-address'),
-            division: document.getElementById('division'),
-            sector: document.getElementById('sector'),
-            typology: document.getElementById('typology'),
             competitors: document.getElementById('competitors'),
             priceSensitivity: document.getElementById('price-sensitivity'),
             expectedVolume: document.getElementById('expected-volume')
@@ -376,7 +524,6 @@
             meetingSubject: document.getElementById('meeting-subject'),
             meetingDate: document.getElementById('meeting-date'),
             nextMeetingDate: document.getElementById('next-meeting-date'),
-            decision: document.getElementById('decision'),
             notes: document.getElementById('notes'),
             agentName: document.getElementById('agent-name')
         };
@@ -389,7 +536,7 @@
             role: document.getElementById('contact-role')
         };
 
-        // Etichette per export e anteprima
+        // Etichette per Export
         const fieldLabels = {
             timestamp: 'Data Registrazione',
             agentName: 'Cognome Referente Commerciale',
@@ -399,7 +546,7 @@
             companyAddress: 'Indirizzo',
             division: 'Divisione',
             sector: 'Settore',
-            typology: 'Tipologia',
+            channel: 'Canale di Vendita', 
             competitors: 'Concorrenti Citati',
             priceSensitivity: 'Sensibilità Prezzo',
             expectedVolume: 'Volumi Attesi',
@@ -412,118 +559,50 @@
             meetingSubject: 'Oggetto Incontro',
             meetingDate: 'Data Incontro',
             nextMeetingDate: 'Prossimo Incontro',
-            decision: 'Decisione',
             notes: 'Note'
         };
 
-        let currentPage = 1;
-        let allVisits = []; // Array persistente delle visite salvate
-        const pageTitles = ["Dati Azienda", "Dati Contatto", "Note e Agente"];
-        
-        // --- Gestione Storage ---
-        const loadVisitsFromLocalStorage = () => {
+        // --- STORAGE ---
+        const loadVisits = () => {
             try {
-                const storedVisits = localStorage.getItem('salesReportVisits');
-                if (storedVisits) {
-                    const parsed = JSON.parse(storedVisits);
-                    // Migrazione per vecchi dati che non avevano l'array 'contacts'
-                    allVisits = parsed.map(v => {
-                        if (!v.contacts) {
-                            // Converti il vecchio contatto singolo in array di 1
-                            v.contacts = [{
-                                name: v.contactName || '',
-                                surname: v.contactSurname || '',
-                                phone: v.contactPhone || '',
-                                email: v.contactEmail || '',
-                                role: v.contactRole || ''
-                            }];
-                        }
-                        return v;
-                    });
-                }
-            } catch (e) {
-                console.error("Errore caricamento:", e);
-                allVisits = [];
+                const data = localStorage.getItem('salesReportVisits');
+                if (data) allVisits = JSON.parse(data);
+            } catch (e) { allVisits = []; }
+        };
+        const saveVisits = () => localStorage.setItem('salesReportVisits', JSON.stringify(allVisits));
+
+        // --- UTILS ---
+        const getMultiSelectValue = (name, customInput) => {
+            const checked = Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
+            if (customInput && customInput.value.trim()) {
+                checked.push(customInput.value.trim());
             }
+            return checked.join('; ');
         };
 
-        const saveVisitsToLocalStorage = () => {
-            localStorage.setItem('salesReportVisits', JSON.stringify(allVisits));
+        const showInputError = (el, msg) => {
+            el.classList.add('input-error');
+            el.placeholder = msg;
+            el.addEventListener('input', () => {
+                el.classList.remove('input-error');
+            }, { once: true });
         };
 
-        // --- Funzioni Multi-Contatto ---
-        btnAddContact.addEventListener('click', () => {
-            const name = contactInputs.name.value.trim();
-            const surname = contactInputs.surname.value.trim();
-            
-            if (!name && !surname) {
-                alert("Inserisci almeno Nome o Cognome.");
-                return;
-            }
-
-            const newContact = {
-                name: name,
-                surname: surname,
-                phone: contactInputs.phone.value.trim(),
-                email: contactInputs.email.value.trim(),
-                role: contactInputs.role.value.trim()
-            };
-
-            currentVisitContacts.push(newContact);
-            updateContactsListUI();
-            
-            // Pulisci i campi contatto per il prossimo inserimento
-            for (let key in contactInputs) contactInputs[key].value = '';
-            contactInputs.name.focus();
-        });
-
-        const updateContactsListUI = () => {
-            contactsListEl.innerHTML = '';
-            if (currentVisitContacts.length === 0) {
-                noContactsMsg.style.display = 'block';
-                contactCountEl.textContent = '0';
-            } else {
-                noContactsMsg.style.display = 'none';
-                contactCountEl.textContent = currentVisitContacts.length;
-                
-                currentVisitContacts.forEach((c, index) => {
-                    const li = document.createElement('li');
-                    li.className = "bg-white border border-gray-200 rounded p-2 flex justify-between items-center text-sm shadow-sm";
-                    li.innerHTML = `
-                        <div>
-                            <span class="font-bold text-gray-700">${c.name} ${c.surname}</span>
-                            <span class="text-gray-500 text-xs ml-2">${c.role}</span>
-                        </div>
-                        <button type="button" class="text-red-500 hover:text-red-700 font-bold px-2" onclick="removeContact(${index})">&times;</button>
-                    `;
-                    contactsListEl.appendChild(li);
-                });
-            }
-        };
-
-        // Espone la funzione rimuovi in global scope per l'onclick HTML
-        window.removeContact = (index) => {
-            currentVisitContacts.splice(index, 1);
-            updateContactsListUI();
-        };
-
-        // --- UI & Navigazione ---
+        // --- NAVIGAZIONE ---
         const updateUI = () => {
-            const count = allVisits.length;
-            visitCountSpan.textContent = count;
-            exportButton.disabled = count === 0;
-            clearButton.disabled = count === 0;
-            previewButton.disabled = count === 0;
-            showPage(currentPage);
-        };
-
-        const showPage = (pageNumber) => {
-            pages.forEach(p => p.classList.remove('active'));
-            document.getElementById(`page${pageNumber}`).classList.add('active');
-            pageIndicator.textContent = `Pagina ${pageNumber} di 3: ${pageTitles[pageNumber - 1]}`;
-            btnPrev.style.visibility = (pageNumber === 1) ? 'hidden' : 'visible';
+            visitCountSpan.textContent = allVisits.length;
+            const hasVisits = allVisits.length > 0;
+            exportButton.disabled = !hasVisits;
+            clearButton.disabled = !hasVisits;
+            previewButton.disabled = !hasVisits;
             
-            if (pageNumber === 3) {
+            pages.forEach(p => p.classList.remove('active'));
+            document.getElementById(`page${currentPage}`).classList.add('active');
+            pageIndicator.textContent = `Pagina ${currentPage} di 3: ${pageTitles[currentPage - 1]}`;
+            
+            btnPrev.style.visibility = currentPage === 1 ? 'hidden' : 'visible';
+            
+            if (currentPage === 3) {
                 btnNext.textContent = 'Salva Visita';
                 btnNext.classList.remove('bg-blue-600', 'hover:bg-blue-700');
                 btnNext.classList.add('bg-green-600', 'hover:bg-green-700');
@@ -533,103 +612,142 @@
                 btnNext.classList.add('bg-blue-600', 'hover:bg-blue-700');
             }
         };
-        
-        btnPrev.addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                showPage(currentPage);
-            }
-        });
-        
+
+        btnPrev.addEventListener('click', () => { if(currentPage > 1) { currentPage--; updateUI(); } });
         btnNext.addEventListener('click', () => {
-            const companyNameInput = document.getElementById('company-name');
-            const agentNameInput = document.getElementById('agent-name');
-
-            if (currentPage === 1 && companyNameInput.value.trim() === '') {
-                showInputError(companyNameInput, 'Il campo Nome è obbligatorio');
-                return;
+            if (currentPage === 1 && !companyNameInput.value.trim()) {
+                showInputError(companyNameInput, "Nome obbligatorio"); return;
             }
-
-            if (currentPage < 3) {
-                currentPage++;
-                showPage(currentPage);
-            } else {
-                if (agentNameInput.value.trim() === '') {
-                    showInputError(agentNameInput, 'Cognome Referente è obbligatorio');
-                    return;
+            if (currentPage === 3) {
+                if (!agentNameInput.value.trim()) {
+                    showInputError(agentNameInput, "Cognome obbligatorio"); return;
                 }
                 saveVisit();
+            } else {
+                currentPage++; updateUI();
             }
         });
 
-        const showInputError = (inputElement, message) => {
-            inputElement.classList.add('input-error');
-            const originalPlaceholder = inputElement.placeholder;
-            inputElement.placeholder = message;
-            inputElement.addEventListener('input', () => {
-                inputElement.classList.remove('input-error');
-                inputElement.placeholder = originalPlaceholder;
-            }, { once: true });
+        // --- MULTI CONTATTO ---
+        btnAddContact.addEventListener('click', () => {
+            if (!contactInputs.name.value.trim() && !contactInputs.surname.value.trim()) {
+                alert("Inserisci almeno un nome o cognome."); return;
+            }
+            currentVisitContacts.push({
+                name: contactInputs.name.value.trim(),
+                surname: contactInputs.surname.value.trim(),
+                phone: contactInputs.phone.value.trim(),
+                email: contactInputs.email.value.trim(),
+                role: contactInputs.role.value.trim()
+            });
+            updateContactsUI();
+            for (let k in contactInputs) contactInputs[k].value = '';
+        });
+
+        window.removeContact = (i) => { currentVisitContacts.splice(i, 1); updateContactsUI(); };
+
+        const updateContactsUI = () => {
+            contactsListEl.innerHTML = '';
+            if (currentVisitContacts.length === 0) {
+                noContactsMsg.style.display = 'block';
+                contactCountEl.textContent = '0';
+            } else {
+                noContactsMsg.style.display = 'none';
+                contactCountEl.textContent = currentVisitContacts.length;
+                currentVisitContacts.forEach((c, i) => {
+                    const li = document.createElement('li');
+                    li.className = "bg-white border p-2 flex justify-between rounded text-sm";
+                    li.innerHTML = `<span>${c.name} ${c.surname}</span><button onclick="removeContact(${i})" class="text-red-500 font-bold">&times;</button>`;
+                    contactsListEl.appendChild(li);
+                });
+            }
         };
 
-        // --- Salvataggio Visita ---
+        // --- SALVATAGGIO VISITA ---
         const saveVisit = () => {
-            // Raccogli dati azienda
-            const visitData = {};
-            for (const key in companyFields) {
-                visitData[key] = companyFields[key].value.trim();
-            }
-            // Raccogli dati incontro e note
-            for (const key in meetingFields) {
-                if (key === 'meetingDate' || key === 'nextMeetingDate') {
-                    visitData[key] = meetingFields[key].value;
-                } else {
-                    visitData[key] = meetingFields[key].value.trim();
-                }
-            }
+            const visit = {
+                division: getMultiSelectValue('division', null),
+                channel: getMultiSelectValue('channel', customChannelInput),
+                sector: getMultiSelectValue('sector', customSectorInput),
+                timestamp: new Date().toLocaleString('it-IT', { 
+                    year: '2-digit', month: '2-digit', day: '2-digit', 
+                    hour: '2-digit', minute: '2-digit' 
+                })
+            };
             
-            visitData.timestamp = new Date().toLocaleString('it-IT', { 
-                year: '2-digit', month: '2-digit', day: '2-digit', 
-                hour: '2-digit', minute: '2-digit' 
-            });
+            for (let k in companyFields) visit[k] = companyFields[k].value.trim();
+            for (let k in meetingFields) {
+                visit[k] = k.includes('Date') ? meetingFields[k].value : meetingFields[k].value.trim();
+            }
 
-            // Aggiungi contatti (se vuoto, aggiungine uno vuoto per generare almeno una riga nel CSV)
             if (currentVisitContacts.length === 0) {
-                currentVisitContacts.push({ name: '', surname: '', phone: '', email: '', role: '' });
+                currentVisitContacts.push({ name:'', surname:'', phone:'', email:'', role:'' });
             }
-            visitData.contacts = [...currentVisitContacts];
+            visit.contacts = [...currentVisitContacts];
 
-            allVisits.push(visitData);
-            saveVisitsToLocalStorage();
+            allVisits.push(visit);
+            saveVisits();
             
-            feedbackMessage.textContent = `Report per "${visitData.companyName}" salvato!`;
-            setTimeout(() => feedbackMessage.textContent = '', 4000);
+            feedbackMessage.textContent = "Visita Salvata!";
+            setTimeout(() => feedbackMessage.textContent = '', 3000);
             
-            // Reset completo
             reportForm.reset();
+            // Reset manuale checkbox, custom inputs e sommari
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            customChannelInput.value = '';
+            customSectorInput.value = '';
+            ['division', 'channel', 'sector'].forEach(n => updateSummary(n, `${n}-summary`));
+            
             currentVisitContacts = [];
-            updateContactsListUI();
+            updateContactsUI();
             currentPage = 1;
             updateUI();
         };
 
-        // --- Export CSV con Fix Note e Multi-Riga ---
-        const escapeCSV = (field) => {
-            if (field === null || field === undefined) return '';
-            let str = String(field);
-            
-            // FIX NOTE: Rimuovi tutti gli 'a capo' e sostituisci con ' - '
-            // Questo previene che il CSV si spezzi su più righe fisiche
-            str = str.replace(/[\r\n]+/g, " - ");
+        // --- AGGIORNAMENTO NOTE ---
+        btnOpenUpdate.addEventListener('click', () => modalUpdate.classList.remove('hidden'));
+        btnCancelUpdate.addEventListener('click', () => modalUpdate.classList.add('hidden'));
+        
+        btnConfirmUpdate.addEventListener('click', () => {
+            const company = document.getElementById('update-company-name').value.trim();
+            const notes = document.getElementById('update-notes-text').value.trim();
+            const agent = document.getElementById('update-agent-name').value.trim();
 
-            // Gestione date YYYY-MM-DD -> DD/MM/YYYY
-            if (str.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                const [y, m, d] = str.split('-');
-                return `${d}/${m}/${y}`;
+            if (!company || !notes || !agent) {
+                alert("Compila tutti i campi!"); return;
             }
+
+            const updateEntry = {
+                timestamp: new Date().toLocaleString('it-IT', { 
+                    year: '2-digit', month: '2-digit', day: '2-digit', 
+                    hour: '2-digit', minute: '2-digit' 
+                }),
+                agentName: agent,
+                companyName: company,
+                notes: ">>> AGGIORNAMENTO NOTE: " + notes,
+                contacts: [{name:'', surname:'', role:'', email:'', phone:''}],
+                division: '', channel: '', sector: '', companyCity: '', companyAddress: '',
+                companyState: '', competitors: '', priceSensitivity: '', expectedVolume: '',
+                meetingType: '', meetingSubject: '', meetingDate: '', nextMeetingDate: ''
+            };
+
+            allVisits.push(updateEntry);
+            saveVisits();
+            updateUI();
             
-            // Escape virgolette
-            if (str.includes(',') || str.includes('"')) {
+            document.getElementById('update-company-name').value = '';
+            document.getElementById('update-notes-text').value = '';
+            modalUpdate.classList.add('hidden');
+            feedbackMessage.textContent = "Aggiornamento Note Salvato!";
+            setTimeout(() => feedbackMessage.textContent = '', 3000);
+        });
+
+        // --- EXPORT CSV ---
+        const escapeCSV = (str) => {
+            if (str === null || str === undefined) return '';
+            str = String(str).replace(/[\r\n]+/g, " - "); // Fix Newlines
+            if (str.match(/^\d{4}-\d{2}-\d{2}$/)) str = str.split('-').reverse().join('/'); // Fix Date
+            if (str.includes(',') || str.includes('"') || str.includes(';')) {
                 str = str.replace(/"/g, '""');
                 return `"${str}"`;
             }
@@ -640,158 +758,62 @@
             if (allVisits.length === 0) return;
             const headers = Object.values(fieldLabels);
             const csvRows = [headers.join(',')];
-            
-            allVisits.forEach(v => {
-                // Per ogni visita, itera su tutti i contatti.
-                // Genera una riga CSV per ogni contatto (denormalizzazione)
-                v.contacts.forEach(contact => {
-                    const rowData = {
-                        ...v,
-                        contactName: contact.name,
-                        contactSurname: contact.surname,
-                        contactPhone: contact.phone,
-                        contactEmail: contact.email,
-                        contactRole: contact.role
-                    };
 
-                    const rowString = Object.keys(fieldLabels).map(key => escapeCSV(rowData[key])).join(',');
-                    csvRows.push(rowString);
+            allVisits.forEach(v => {
+                v.contacts.forEach(c => {
+                    const flatRow = { ...v, 
+                        contactName: c.name, contactSurname: c.surname, 
+                        contactPhone: c.phone, contactEmail: c.email, contactRole: c.role 
+                    };
+                    csvRows.push(Object.keys(fieldLabels).map(k => escapeCSV(flatRow[k])).join(','));
                 });
             });
 
-            const csvContent = '\uFEFF' + csvRows.join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
+            const blob = new Blob(['\uFEFF' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
-            const date = new Date().toISOString().slice(0, 10);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `report-visite-${date}.csv`);
-            document.body.appendChild(link);
+            link.href = URL.createObjectURL(blob);
+            link.download = `report-visite-${new Date().toISOString().slice(0,10)}.csv`;
             link.click();
-            document.body.removeChild(link);
-        });
-        
-        // --- Altre Funzioni (Svuota, Anteprima, QR) ---
-        clearButton.addEventListener('click', () => {
-            if (allVisits.length === 0) return;
-            modal.classList.remove('hidden');
-        });
-        
-        modalBtnCancel.addEventListener('click', () => modal.classList.add('hidden'));
-        
-        modalBtnConfirm.addEventListener('click', () => {
-            allVisits = [];
-            saveVisitsToLocalStorage();
-            updateUI();
-            modal.classList.add('hidden');
-            feedbackMessage.textContent = 'Dati locali eliminati.';
-            setTimeout(() => feedbackMessage.textContent = '', 4000);
         });
 
-        // Scanner QR (Logica identica a v8)
-        const stopQrScanner = () => {
-            if (html5QrCode && html5QrCode.isScanning) {
-                html5QrCode.stop().catch(err => console.warn("Stop error", err));
-            }
-            qrModal.classList.add('hidden');
-            qrScanFeedback.textContent = '';
+        // --- ANTEPRIMA ---
+        previewButton.addEventListener('click', () => {
+            let txt = '';
+            allVisits.forEach((v, i) => {
+                txt += `--- VISITA ${i+1} ---\nAZIENDA: ${v.companyName}\n`;
+                if (v.notes.startsWith(">>>")) txt += `TIPO: ${v.notes}\n`; 
+                else {
+                    txt += `DIVISIONI: ${v.division}\nCANALE: ${v.channel}\nSETTORE: ${v.sector}\n`;
+                    txt += `NOTE: ${v.notes}\n`;
+                }
+                txt += `\n`;
+            });
+            previewContent.textContent = txt;
+            previewBox.classList.remove('hidden');
+            previewBox.scrollIntoView({behavior: 'smooth'});
+        });
+        btnClosePreview.addEventListener('click', () => previewBox.classList.add('hidden'));
+
+        // --- ALTRE FUNZIONI (QR, Svuota) ---
+        clearButton.addEventListener('click', () => modalConfirm.classList.remove('hidden'));
+        modalBtnCancel.addEventListener('click', () => modalConfirm.classList.add('hidden'));
+        modalBtnConfirm.addEventListener('click', () => { allVisits=[]; saveVisits(); updateUI(); modalConfirm.classList.add('hidden'); });
+
+        const onScanSuccess = (text) => {
+            companyFields.companyName.value = text; 
+            feedbackMessage.textContent = "QR Letto (Dati Grezzi inseriti in Nome)";
+            stopQr();
         };
-
+        const stopQr = () => { if(html5QrCode) html5QrCode.stop().catch(()=>{}); qrModal.classList.add('hidden'); };
+        
         btnScanQr.addEventListener('click', () => {
             qrModal.classList.remove('hidden');
-            if (!html5QrCode) {
-                try { html5QrCode = new Html5Qrcode("qr-reader"); } catch(e) {}
-            }
-            Html5Qrcode.getCameras().then(devices => {
-                if (devices && devices.length) {
-                    const cameraId = devices.find(d => d.label.toLowerCase().includes('back'))?.id || devices[0].id;
-                    html5QrCode.start(cameraId, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess, onScanFailure);
-                }
-            }).catch(err => qrScanFeedback.textContent = "Errore fotocamera.");
+            if(!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
+            html5QrCode.start({ facingMode: "environment" }, { fps: 10 }, onScanSuccess).catch(() => {});
         });
-        
-        btnCloseQr.addEventListener('click', stopQrScanner);
+        btnCloseQr.addEventListener('click', stopQr);
 
-        const onScanSuccess = (decodedText) => {
-            const success = parseVCard(decodedText) || parseJSON(decodedText);
-            if (success) {
-                feedbackMessage.textContent = "Dati QR importati!";
-            } else {
-                meetingFields.notes.value = (meetingFields.notes.value ? meetingFields.notes.value + ' - ' : '') + 'DATI QR: ' + decodedText;
-                feedbackMessage.textContent = "QR copiato nelle Note!";
-                currentPage = 3;
-                showPage(3);
-            }
-            stopQrScanner();
-            setTimeout(() => feedbackMessage.textContent = '', 4000);
-        };
-        
-        const onScanFailure = (error) => {};
-
-        // Funzioni Parser (Aggiornate per popolare i campi contatto TEMP invece di quelli diretti)
-        // Dato che ora i contatti sono multipli, il QR riempie i campi di input "Aggiungi Contatto"
-        const parseVCard = (text) => {
-            if (!text.startsWith('BEGIN:VCARD')) return false;
-            // ... logica vCard semplificata per brevità, identica a v8 ma punta a contactInputs ...
-            let vCardData = {};
-            text.split('\n').forEach(line => {
-                if (line.includes(':')) {
-                    let [key, ...value] = line.split(':');
-                    vCardData[key.split(';')[0].trim().toUpperCase()] = value.join(':').trim();
-                }
-            });
-            if (vCardData.ORG) companyFields.companyName.value = vCardData.ORG;
-            // Popola campi contatto TEMP
-            if (vCardData.N) {
-                const [s, n] = vCardData.N.split(';');
-                contactInputs.surname.value = s || '';
-                contactInputs.name.value = n || '';
-            }
-            if (vCardData.TEL) contactInputs.phone.value = vCardData.TEL;
-            if (vCardData.EMAIL) contactInputs.email.value = vCardData.EMAIL;
-            if (vCardData.TITLE) contactInputs.role.value = vCardData.TITLE;
-            return true;
-        };
-        
-        const parseJSON = (text) => {
-            try {
-                const data = JSON.parse(text);
-                const l = {}; 
-                for(let k in data) l[k.toLowerCase()] = data[k];
-                companyFields.companyName.value = l.company || l.azienda || companyFields.companyName.value;
-                // Popola campi contatto TEMP
-                contactInputs.name.value = l.name || l.nome || contactInputs.name.value;
-                contactInputs.surname.value = l.surname || l.cognome || contactInputs.surname.value;
-                contactInputs.email.value = l.email || contactInputs.email.value;
-                contactInputs.phone.value = l.phone || contactInputs.phone.value;
-                return true;
-            } catch (e) { return false; }
-        };
-
-        // Anteprima semplice
-        previewButton.addEventListener('click', () => {
-            if (allVisits.length === 0) return;
-            let previewText = '';
-            allVisits.forEach((visit, index) => {
-                previewText += `--- VISITA ${index + 1} ---\n`;
-                previewText += `Azienda: ${visit.companyName}\n`;
-                previewText += `Contatti Incontrati: ${visit.contacts.length}\n`;
-                visit.contacts.forEach(c => {
-                    previewText += `  - ${c.name} ${c.surname} (${c.role})\n`;
-                });
-                previewText += `Note: ${visit.notes}\n\n`;
-            });
-            previewContent.textContent = previewText;
-            previewBox.classList.remove('hidden');
-            previewBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-
-        btnClosePreview.addEventListener('click', () => {
-            previewBox.classList.add('hidden');
-            previewContent.textContent = '';
-        });
-
-        loadVisitsFromLocalStorage();
+        loadVisits();
         updateUI();
     });
     </script>
