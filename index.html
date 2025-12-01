@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebApp Report Visite</title>
     
-    <!-- ICONE PER LA HOME SCREEN -->
     <link rel="icon" href="Logo CERVE WebApp.jpg">
     <link rel="apple-touch-icon" href="Logo CERVE WebApp.jpg">
 
@@ -14,95 +13,29 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Icone Lucide (leggere e moderne) -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .input-focus:focus {
-            box-shadow: 0 0 0 2px #3b82f6;
-            border-color: #3b82f6;
-        }
-        .page {
-            display: none;
-        }
-        .page.active {
-            display: block;
-        }
-        #confirmation-modal.hidden, #qr-scanner-modal.hidden, #preview-box.hidden, #update-notes-modal.hidden {
-            display: none;
-        }
-        .input-error {
-            border-color: #ef4444;
-            box-shadow: 0 0 0 2px #fecaca;
-        }
-        #qr-reader {
-            width: 100%;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            border: 4px solid #3b82f6;
-        }
-        .export-group {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-        @media (min-width: 768px) {
-            .export-group {
-                grid-template-columns: 1fr 1fr;
-            }
-            .export-group-full {
-                grid-template-columns: 1fr 1fr 1fr;
-            }
-        }
-        #preview-content {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            font-family: Consolas, 'Courier New', monospace;
-            line-height: 1.6;
-        }
-        /* Accordion Styles */
-        .accordion-header {
-            cursor: pointer;
-            user-select: none;
-            transition: background-color 0.2s;
-        }
-        .accordion-header:hover {
-            background-color: #f3f4f6;
-        }
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-        .accordion-content.open {
-            max-height: 500px;
-            transition: max-height 0.3s ease-in;
-        }
-        .rotate-180 {
-            transform: rotate(180deg);
-        }
-        .arrow-icon {
-            transition: transform 0.3s;
-        }
-        /* Custom Select Wrapper */
-        .select-wrapper {
-            position: relative;
-        }
-        .select-wrapper::after {
-            content: '';
-            position: absolute;
-            right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 0; 
-            height: 0; 
-            border-left: 5px solid transparent;
-            border-right: 5px solid transparent;
-            border-top: 5px solid #6b7280;
-            pointer-events: none;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .input-focus:focus { box-shadow: 0 0 0 2px #3b82f6; border-color: #3b82f6; }
+        .page { display: none; }
+        .page.active { display: block; }
+        #confirmation-modal.hidden, #qr-scanner-modal.hidden, #preview-box.hidden, #update-notes-modal.hidden { display: none; }
+        .input-error { border-color: #ef4444; box-shadow: 0 0 0 2px #fecaca; }
+        #qr-reader { width: 100%; border-radius: 0.5rem; overflow: hidden; border: 4px solid #3b82f6; }
+        .export-group { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        @media (min-width: 768px) { .export-group { grid-template-columns: 1fr 1fr; } .export-group-full { grid-template-columns: 1fr 1fr 1fr 1fr; } }
+        #preview-content { white-space: pre-wrap; word-wrap: break-word; font-family: Consolas, 'Courier New', monospace; line-height: 1.6; }
+        .checkbox-group { display: flex; flex-direction: column; gap: 0.5rem; max-height: 200px; overflow-y: auto; padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background-color: #f9fafb; }
+        .checkbox-item { display: flex; align-items: center; gap: 0.5rem; }
+        .checkbox-item input[type="checkbox"] { width: 1.25rem; height: 1.25rem; border-radius: 0.25rem; cursor: pointer; }
+        .accordion-header { cursor: pointer; user-select: none; transition: background-color 0.2s; }
+        .accordion-header:hover { background-color: #f3f4f6; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .accordion-content.open { max-height: 500px; transition: max-height 0.3s ease-in; }
+        .rotate-180 { transform: rotate(180deg); }
+        .arrow-icon { transition: transform 0.3s; }
+        .select-wrapper { position: relative; }
+        .select-wrapper::after { content: ''; position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid #6b7280; pointer-events: none; }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -113,18 +46,16 @@
                 <p id="page-indicator" class="text-gray-500 mt-2 font-medium">Pagina 1 di 3: Dati Azienda</p>
             </div>
 
-            <form id="report-form" class="space-y-6">
-                <!-- Pagina 1: Dati Azienda -->
-                <div id="page1" class="page active">
-                    
-                    <!-- PULSANTE AGGIORNAMENTO NOTE -->
-                    <div class="mb-4 flex justify-end">
-                        <button type="button" id="btn-open-update-notes" class="text-sm text-blue-600 font-semibold hover:underline flex items-center gap-1">
-                            <i data-lucide="edit-2" class="w-4 h-4"></i>
-                            Aggiorna Note Azienda Esistente
-                        </button>
-                    </div>
+            <div id="top-actions" class="mb-6 flex justify-end">
+                <button type="button" id="btn-open-update-notes" class="text-sm text-blue-600 font-semibold hover:underline flex items-center gap-1">
+                    <i data-lucide="edit-2" class="w-4 h-4"></i>
+                    Aggiorna Note Azienda Esistente
+                </button>
+            </div>
 
+            <form id="report-form" class="space-y-6">
+                <!-- Pagina 1 -->
+                <div id="page1" class="page active">
                     <div class="mb-6">
                         <button type="button" id="btn-scan-qr" class="w-full flex items-center justify-center gap-2 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all shadow-md">
                             <i data-lucide="qr-code" class="w-5 h-5"></i>
@@ -150,7 +81,7 @@
                             <input type="text" id="company-address" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus">
                         </div>
                         
-                        <!-- CAMPO DIVISIONE (Accordion) -->
+                        <!-- Divisione Accordion -->
                         <div class="md:col-span-2 border border-gray-300 rounded-lg overflow-hidden">
                             <div class="accordion-header flex justify-between items-center p-3 bg-gray-50" onclick="toggleAccordion('division-content', 'division-arrow')">
                                 <div>
@@ -164,7 +95,7 @@
                             </div>
                         </div>
 
-                        <!-- CAMPO CANALE VENDITA (Accordion) -->
+                        <!-- Canale Vendita Accordion -->
                         <div class="md:col-span-2 border border-gray-300 rounded-lg overflow-hidden">
                             <div class="accordion-header flex justify-between items-center p-3 bg-gray-50" onclick="toggleAccordion('channel-content', 'channel-arrow')">
                                 <div>
@@ -175,13 +106,11 @@
                             </div>
                             <div id="channel-content" class="accordion-content bg-white px-3">
                                 <div class="py-3 space-y-2" id="channel-container"></div>
-                                <div class="pb-3">
-                                    <input type="text" id="custom-channel" class="w-full px-3 py-2 border border-gray-200 rounded text-sm focus:outline-none input-focus" placeholder="Altro (specificare)...">
-                                </div>
+                                <div class="pb-3"><input type="text" id="custom-channel" class="w-full px-3 py-2 border border-gray-200 rounded text-sm focus:outline-none input-focus" placeholder="Altro (specificare)..."></div>
                             </div>
                         </div>
 
-                        <!-- CAMPO SETTORE (Accordion) -->
+                        <!-- Settore Accordion -->
                         <div class="md:col-span-2 border border-gray-300 rounded-lg overflow-hidden">
                             <div class="accordion-header flex justify-between items-center p-3 bg-gray-50" onclick="toggleAccordion('sector-content', 'sector-arrow')">
                                 <div>
@@ -192,9 +121,7 @@
                             </div>
                             <div id="sector-content" class="accordion-content bg-white px-3">
                                 <div class="py-3 space-y-2" id="sector-container"></div>
-                                <div class="pb-3">
-                                    <input type="text" id="custom-sector" class="w-full px-3 py-2 border border-gray-200 rounded text-sm focus:outline-none input-focus" placeholder="Altro (specificare)...">
-                                </div>
+                                <div class="pb-3"><input type="text" id="custom-sector" class="w-full px-3 py-2 border border-gray-200 rounded text-sm focus:outline-none input-focus" placeholder="Altro (specificare)..."></div>
                             </div>
                         </div>
                         
@@ -206,17 +133,13 @@
                         <div class="select-wrapper">
                             <label for="price-sensitivity" class="block text-sm font-medium text-gray-600 mb-1">Sensibilità al Prezzo</label>
                             <input list="price-sensitivity-list" id="price-sensitivity" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus cursor-pointer" placeholder="Seleziona...">
-                            <datalist id="price-sensitivity-list">
-                                <option value="Alta"></option><option value="Media"></option><option value="Bassa"></option>
-                            </datalist>
+                            <datalist id="price-sensitivity-list"><option value="Alta"></option><option value="Media"></option><option value="Bassa"></option></datalist>
                         </div>
                         
                         <div class="select-wrapper">
                             <label for="expected-volume" class="block text-sm font-medium text-gray-600 mb-1">Volumi Attesi</label>
                             <input list="expected-volume-list" id="expected-volume" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus cursor-pointer" placeholder="Seleziona...">
-                            <datalist id="expected-volume-list">
-                                <option value="Alti"></option><option value="Medi"></option><option value="Bassi"></option>
-                            </datalist>
+                            <datalist id="expected-volume-list"><option value="Alti"></option><option value="Medi"></option><option value="Bassi"></option></datalist>
                         </div>
                     </div>
                 </div>
@@ -253,9 +176,7 @@
                         <div class="select-wrapper">
                             <label for="meeting-type" class="block text-sm font-medium text-gray-600 mb-1">Tipo di Incontro</label>
                             <input list="meeting-type-list" id="meeting-type" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none input-focus cursor-pointer" placeholder="Seleziona...">
-                            <datalist id="meeting-type-list">
-                                <option value="Visita"></option><option value="Chiamata"></option><option value="Email"></option><option value="Fiera"></option><option value="Evento"></option>
-                            </datalist>
+                            <datalist id="meeting-type-list"><option value="Visita"></option><option value="Chiamata"></option><option value="Email"></option><option value="Fiera"></option><option value="Evento"></option></datalist>
                         </div>
                         <div class="md:col-span-2">
                             <label for="meeting-subject" class="block text-sm font-medium text-gray-600 mb-1">Oggetto Incontro</label>
@@ -311,12 +232,19 @@
             </p>
             
             <div class="export-group export-group-full">
+                <!-- TASTO CONDIVIDI MOBILE -->
+                <button id="btn-share-mobile" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-all shadow-md disabled:bg-gray-400 hidden">
+                    Condividi File (Email/WA)
+                </button>
+
                 <button id="preview-data" class="bg-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-300 transition-all shadow-md disabled:bg-gray-400" disabled>
                     Vedi Anteprima
                 </button>
+                
                 <button id="export-csv" class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all shadow-md disabled:bg-gray-400" disabled>
-                    Esporta in CSV
+                    Scarica .TXT (PC)
                 </button>
+                
                 <button id="clear-data" class="bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 transition-all shadow-md disabled:bg-gray-400" disabled>
                     Svuota Dati
                 </button>
@@ -328,20 +256,11 @@
     <div id="update-notes-modal" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
             <h3 class="text-xl font-bold text-gray-800 mb-4">Aggiorna Note Azienda</h3>
-            <p class="text-sm text-gray-500 mb-4">Inserisci il nome dell'azienda già visitata e le nuove note da aggiungere.</p>
+            <p class="text-sm text-gray-500 mb-4">Inserisci il nome dell'azienda già visitata e le nuove note.</p>
             <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Nome Azienda (Esatto)</label>
-                    <input type="text" id="update-company-name" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Nuove Note</label>
-                    <textarea id="update-notes-text" rows="5" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Il tuo Cognome</label>
-                    <input type="text" id="update-agent-name" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                </div>
+                <div><label class="block text-sm font-medium text-gray-700">Nome Azienda (Esatto)</label><input type="text" id="update-company-name" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"></div>
+                <div><label class="block text-sm font-medium text-gray-700">Nuove Note</label><textarea id="update-notes-text" rows="5" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"></textarea></div>
+                <div><label class="block text-sm font-medium text-gray-700">Il tuo Cognome</label><input type="text" id="update-agent-name" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"></div>
             </div>
             <div class="mt-6 flex justify-end space-x-3">
                 <button id="btn-cancel-update" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Annulla</button>
@@ -350,11 +269,11 @@
         </div>
     </div>
 
-    <!-- Modale Conferma Eliminazione -->
+    <!-- Modale Conferma -->
     <div id="confirmation-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full">
             <h3 class="text-xl font-bold text-gray-800 mb-4">Conferma Eliminazione</h3>
-            <p class="text-gray-600 mb-6">Sei sicuro di voler eliminare <strong id="modal-visit-count">0</strong> visite salvate?</p>
+            <p class="text-gray-600 mb-6">Sei sicuro di voler eliminare <strong id="modal-visit-count">0</strong> visite?</p>
             <div class="flex justify-end space-x-4">
                 <button id="modal-btn-cancel" class="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600">Annulla</button>
                 <button id="modal-btn-confirm" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700">Elimina</button>
@@ -373,10 +292,7 @@
     </div>
 
     <script>
-        // Inizializza icone Lucide
         lucide.createIcons();
-
-        // Espone toggleAccordion globalmente
         window.toggleAccordion = (contentId, arrowId) => {
             const content = document.getElementById(contentId);
             const arrow = document.getElementById(arrowId);
@@ -390,12 +306,12 @@
         };
 
     document.addEventListener('DOMContentLoaded', () => {
-        // --- DATI PER MULTI-SELECT ---
+        // ... (DATI MULTI-SELECT INVARIATI) ...
         const divisions = ["VidiVi Italia", "VidiVi Estero", "Casalingo Italia", "Casalingo Estero", "B2B Italia", "B2B Estero"];
         const channels = ["GDS", "GDO", "Dettaglio", "Promozioni Aziendali", "Grossista", "Ho.Re.Ca.", "E-commerce", "Produttore"];
         const sectors = ["Vario", "Soft Drinks", "Cantina", "Birreria", "Bar", "Distilleria", "Gelateria"];
 
-        // --- GENERAZIONE CHECKBOX ---
+        // GENERAZIONE CHECKBOX
         const generateCheckboxes = (containerId, items, name, summaryId) => {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
@@ -419,7 +335,6 @@
             let customVal = '';
             if (name === 'channel') customVal = document.getElementById('custom-channel').value.trim();
             if (name === 'sector') customVal = document.getElementById('custom-sector').value.trim();
-            
             if (customVal) checked.push(customVal);
 
             if (checked.length > 0) {
@@ -436,53 +351,40 @@
         generateCheckboxes('division-container', divisions, 'division', 'division-summary');
         generateCheckboxes('channel-container', channels, 'channel', 'channel-summary');
         generateCheckboxes('sector-container', sectors, 'sector', 'sector-summary');
-
         document.getElementById('custom-channel').addEventListener('input', () => updateSummary('channel', 'channel-summary'));
         document.getElementById('custom-sector').addEventListener('input', () => updateSummary('sector', 'sector-summary'));
 
-        // --- RIFERIMENTI DOM ---
+        // DOM REFERENCES
         const reportForm = document.getElementById('report-form');
         const pageIndicator = document.getElementById('page-indicator');
         const pages = document.querySelectorAll('.page');
         const btnPrev = document.getElementById('btn-prev');
         const btnNext = document.getElementById('btn-next');
         const exportButton = document.getElementById('export-csv');
+        const btnShareMobile = document.getElementById('btn-share-mobile'); // NUOVO
         const clearButton = document.getElementById('clear-data');
         const visitCountSpan = document.getElementById('visit-count');
         const feedbackMessage = document.getElementById('feedback-message');
         const companyNameInput = document.getElementById('company-name');
         const agentNameInput = document.getElementById('agent-name');
-
-        // Custom inputs
         const customChannelInput = document.getElementById('custom-channel');
         const customSectorInput = document.getElementById('custom-sector');
-
-        // Multi Contatto
         const btnAddContact = document.getElementById('btn-add-contact');
         const contactsListEl = document.getElementById('contacts-list');
         const noContactsMsg = document.getElementById('no-contacts-msg');
         const contactCountEl = document.getElementById('contact-count');
-        
-        // Modali
         const modalConfirm = document.getElementById('confirmation-modal');
-        const modalVisitCount = document.getElementById('modal-visit-count');
         const modalBtnCancel = document.getElementById('modal-btn-cancel');
         const modalBtnConfirm = document.getElementById('modal-btn-confirm');
-        
         const modalUpdate = document.getElementById('update-notes-modal');
         const btnOpenUpdate = document.getElementById('btn-open-update-notes');
         const btnCancelUpdate = document.getElementById('btn-cancel-update');
         const btnConfirmUpdate = document.getElementById('btn-confirm-update');
-
-        // QR
         const btnScanQr = document.getElementById('btn-scan-qr');
         const qrModal = document.getElementById('qr-scanner-modal');
-        const qrReaderDiv = document.getElementById('qr-reader');
         const qrScanFeedback = document.getElementById('qr-scan-feedback');
         const btnCloseQr = document.getElementById('modal-btn-close-qr');
         let html5QrCode = null;
-
-        // Anteprima
         const previewButton = document.getElementById('preview-data');
         const previewBox = document.getElementById('preview-box');
         const previewContent = document.getElementById('preview-content');
@@ -493,7 +395,6 @@
         let currentVisitContacts = [];
         const pageTitles = ["Dati Azienda", "Dati Contatto", "Note e Agente"];
 
-        // --- MAPPIAMO I CAMPI ---
         const companyFields = {
             companyName: document.getElementById('company-name'),
             companyState: document.getElementById('company-state'),
@@ -503,7 +404,6 @@
             priceSensitivity: document.getElementById('price-sensitivity'),
             expectedVolume: document.getElementById('expected-volume')
         };
-
         const meetingFields = {
             meetingType: document.getElementById('meeting-type'),
             meetingSubject: document.getElementById('meeting-subject'),
@@ -512,7 +412,6 @@
             notes: document.getElementById('notes'),
             agentName: document.getElementById('agent-name')
         };
-
         const contactInputs = {
             name: document.getElementById('contact-name'),
             surname: document.getElementById('contact-surname'),
@@ -520,60 +419,22 @@
             email: document.getElementById('contact-email'),
             role: document.getElementById('contact-role')
         };
-
-        // Etichette per Export
         const fieldLabels = {
-            timestamp: 'Data Registrazione',
-            agentName: 'Cognome Referente Commerciale',
-            companyName: 'Nome Azienda',
-            companyState: 'Stato/Regione',
-            companyCity: 'Città',
-            companyAddress: 'Indirizzo',
-            division: 'Divisione',
-            sector: 'Settore',
-            channel: 'Canale di Vendita', 
-            competitors: 'Concorrenti Citati',
-            priceSensitivity: 'Sensibilità Prezzo',
-            expectedVolume: 'Volumi Attesi',
-            contactName: 'Nome Contatto',
-            contactSurname: 'Cognome Contatto',
-            contactPhone: 'Telefono Contatto',
-            contactEmail: 'Email Contatto',
-            contactRole: 'Ruolo Contatto',
-            meetingType: 'Tipo Incontro',
-            meetingSubject: 'Oggetto Incontro',
-            meetingDate: 'Data Incontro',
-            nextMeetingDate: 'Prossimo Incontro',
-            notes: 'Note'
+            timestamp: 'Data Registrazione', agentName: 'Cognome Referente Commerciale', companyName: 'Nome Azienda', companyState: 'Stato/Regione', companyCity: 'Città', companyAddress: 'Indirizzo', division: 'Divisione', sector: 'Settore', channel: 'Canale di Vendita', competitors: 'Concorrenti Citati', priceSensitivity: 'Sensibilità Prezzo', expectedVolume: 'Volumi Attesi', contactName: 'Nome Contatto', contactSurname: 'Cognome Contatto', contactPhone: 'Telefono Contatto', contactEmail: 'Email Contatto', contactRole: 'Ruolo Contatto', meetingType: 'Tipo Incontro', meetingSubject: 'Oggetto Incontro', meetingDate: 'Data Incontro', nextMeetingDate: 'Prossimo Incontro', notes: 'Note'
         };
 
-        // --- STORAGE ---
-        const loadVisits = () => {
-            try {
-                const data = localStorage.getItem('salesReportVisits');
-                if (data) allVisits = JSON.parse(data);
-            } catch (e) { allVisits = []; }
-        };
+        const loadVisits = () => { try { const data = localStorage.getItem('salesReportVisits'); if (data) allVisits = JSON.parse(data); } catch (e) { allVisits = []; } };
         const saveVisits = () => localStorage.setItem('salesReportVisits', JSON.stringify(allVisits));
-
-        // --- UTILS ---
         const getMultiSelectValue = (name, customInput) => {
             const checked = Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
-            if (customInput && customInput.value.trim()) {
-                checked.push(customInput.value.trim());
-            }
+            if (customInput && customInput.value.trim()) checked.push(customInput.value.trim());
             return checked.join('; ');
         };
-
         const showInputError = (el, msg) => {
-            el.classList.add('input-error');
-            el.placeholder = msg;
-            el.addEventListener('input', () => {
-                el.classList.remove('input-error');
-            }, { once: true });
+            el.classList.add('input-error'); el.placeholder = msg;
+            el.addEventListener('input', () => { el.classList.remove('input-error'); }, { once: true });
         };
 
-        // --- NAVIGAZIONE ---
         const updateUI = () => {
             visitCountSpan.textContent = allVisits.length;
             const hasVisits = allVisits.length > 0;
@@ -581,12 +442,19 @@
             clearButton.disabled = !hasVisits;
             previewButton.disabled = !hasVisits;
             
+            // Gestione visibilità Tasto Condividi
+            if (navigator.canShare && navigator.share && hasVisits) {
+                btnShareMobile.disabled = false;
+                btnShareMobile.classList.remove('hidden');
+                // Su mobile nascondiamo il "Scarica .TXT" se c'è Share, o li teniamo entrambi? Meglio tenerli entrambi ma dare risalto a Share
+            } else {
+                btnShareMobile.classList.add('hidden');
+            }
+
             pages.forEach(p => p.classList.remove('active'));
             document.getElementById(`page${currentPage}`).classList.add('active');
             pageIndicator.textContent = `Pagina ${currentPage} di 3: ${pageTitles[currentPage - 1]}`;
-            
             btnPrev.style.visibility = currentPage === 1 ? 'hidden' : 'visible';
-            
             if (currentPage === 3) {
                 btnNext.textContent = 'Salva Visita';
                 btnNext.classList.remove('bg-blue-600', 'hover:bg-blue-700');
@@ -600,207 +468,166 @@
 
         btnPrev.addEventListener('click', () => { if(currentPage > 1) { currentPage--; updateUI(); } });
         btnNext.addEventListener('click', () => {
-            if (currentPage === 1 && !companyNameInput.value.trim()) {
-                showInputError(companyNameInput, "Nome obbligatorio"); return;
-            }
+            if (currentPage === 1 && !companyNameInput.value.trim()) { showInputError(companyNameInput, "Nome obbligatorio"); return; }
             if (currentPage === 3) {
-                if (!agentNameInput.value.trim()) {
-                    showInputError(agentNameInput, "Cognome obbligatorio"); return;
-                }
+                if (!agentNameInput.value.trim()) { showInputError(agentNameInput, "Cognome obbligatorio"); return; }
                 saveVisit();
-            } else {
-                currentPage++; updateUI();
-            }
+            } else { currentPage++; updateUI(); }
         });
 
-        // --- MULTI CONTATTO ---
         btnAddContact.addEventListener('click', () => {
-            if (!contactInputs.name.value.trim() && !contactInputs.surname.value.trim()) {
-                alert("Inserisci almeno un nome o cognome."); return;
-            }
-            currentVisitContacts.push({
-                name: contactInputs.name.value.trim(),
-                surname: contactInputs.surname.value.trim(),
-                phone: contactInputs.phone.value.trim(),
-                email: contactInputs.email.value.trim(),
-                role: contactInputs.role.value.trim()
-            });
+            if (!contactInputs.name.value.trim() && !contactInputs.surname.value.trim()) { alert("Inserisci almeno un nome o cognome."); return; }
+            currentVisitContacts.push({ name: contactInputs.name.value.trim(), surname: contactInputs.surname.value.trim(), phone: contactInputs.phone.value.trim(), email: contactInputs.email.value.trim(), role: contactInputs.role.value.trim() });
             updateContactsUI();
             for (let k in contactInputs) contactInputs[k].value = '';
         });
-
         window.removeContact = (i) => { currentVisitContacts.splice(i, 1); updateContactsUI(); };
-
         const updateContactsUI = () => {
             contactsListEl.innerHTML = '';
-            if (currentVisitContacts.length === 0) {
-                noContactsMsg.style.display = 'block';
-                contactCountEl.textContent = '0';
-            } else {
-                noContactsMsg.style.display = 'none';
-                contactCountEl.textContent = currentVisitContacts.length;
+            if (currentVisitContacts.length === 0) { noContactsMsg.style.display = 'block'; contactCountEl.textContent = '0'; } 
+            else {
+                noContactsMsg.style.display = 'none'; contactCountEl.textContent = currentVisitContacts.length;
                 currentVisitContacts.forEach((c, i) => {
-                    const li = document.createElement('li');
-                    li.className = "bg-white border p-2 flex justify-between rounded text-sm";
+                    const li = document.createElement('li'); li.className = "bg-white border p-2 flex justify-between rounded text-sm";
                     li.innerHTML = `<span>${c.name} ${c.surname}</span><button onclick="removeContact(${i})" class="text-red-500 font-bold">&times;</button>`;
                     contactsListEl.appendChild(li);
                 });
             }
         };
 
-        // --- SALVATAGGIO VISITA ---
         const saveVisit = () => {
             const visit = {
-                division: getMultiSelectValue('division', null),
-                channel: getMultiSelectValue('channel', customChannelInput),
-                sector: getMultiSelectValue('sector', customSectorInput),
-                timestamp: new Date().toLocaleString('it-IT', { 
-                    year: '2-digit', month: '2-digit', day: '2-digit', 
-                    hour: '2-digit', minute: '2-digit' 
-                })
+                division: getMultiSelectValue('division', null), channel: getMultiSelectValue('channel', customChannelInput), sector: getMultiSelectValue('sector', customSectorInput),
+                timestamp: new Date().toLocaleString('it-IT', { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
             };
-            
             for (let k in companyFields) visit[k] = companyFields[k].value.trim();
-            for (let k in meetingFields) {
-                visit[k] = k.includes('Date') ? meetingFields[k].value : meetingFields[k].value.trim();
-            }
-
-            if (currentVisitContacts.length === 0) {
-                currentVisitContacts.push({ name:'', surname:'', phone:'', email:'', role:'' });
-            }
+            for (let k in meetingFields) visit[k] = k.includes('Date') ? meetingFields[k].value : meetingFields[k].value.trim();
+            if (currentVisitContacts.length === 0) currentVisitContacts.push({ name:'', surname:'', phone:'', email:'', role:'' });
             visit.contacts = [...currentVisitContacts];
-
-            allVisits.push(visit);
-            saveVisits();
-            
-            feedbackMessage.textContent = "Visita Salvata!";
-            setTimeout(() => feedbackMessage.textContent = '', 3000);
-            
+            allVisits.push(visit); saveVisits();
+            feedbackMessage.textContent = "Visita Salvata!"; setTimeout(() => feedbackMessage.textContent = '', 3000);
             reportForm.reset();
-            // Reset manuale checkbox, custom inputs e sommari
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-            customChannelInput.value = '';
-            customSectorInput.value = '';
+            customChannelInput.value = ''; customSectorInput.value = '';
             ['division', 'channel', 'sector'].forEach(n => updateSummary(n, `${n}-summary`));
-            
-            currentVisitContacts = [];
-            updateContactsUI();
-            currentPage = 1;
-            updateUI();
+            currentVisitContacts = []; updateContactsUI(); currentPage = 1; updateUI();
         };
 
-        // --- AGGIORNAMENTO NOTE ---
         btnOpenUpdate.addEventListener('click', () => modalUpdate.classList.remove('hidden'));
         btnCancelUpdate.addEventListener('click', () => modalUpdate.classList.add('hidden'));
-        
         btnConfirmUpdate.addEventListener('click', () => {
             const company = document.getElementById('update-company-name').value.trim();
             const notes = document.getElementById('update-notes-text').value.trim();
             const agent = document.getElementById('update-agent-name').value.trim();
-
-            if (!company || !notes || !agent) {
-                alert("Compila tutti i campi!"); return;
-            }
-
+            if (!company || !notes || !agent) { alert("Compila tutti i campi!"); return; }
             const updateEntry = {
-                timestamp: new Date().toLocaleString('it-IT', { 
-                    year: '2-digit', month: '2-digit', day: '2-digit', 
-                    hour: '2-digit', minute: '2-digit' 
-                }),
-                agentName: agent,
-                companyName: company,
-                notes: ">>> AGGIORNAMENTO NOTE: " + notes,
+                timestamp: new Date().toLocaleString('it-IT', { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+                agentName: agent, companyName: company, notes: ">>> AGGIORNAMENTO NOTE: " + notes,
                 contacts: [{name:'', surname:'', role:'', email:'', phone:''}],
-                division: '', channel: '', sector: '', companyCity: '', companyAddress: '',
-                companyState: '', competitors: '', priceSensitivity: '', expectedVolume: '',
-                meetingType: '', meetingSubject: '', meetingDate: '', nextMeetingDate: ''
+                division: '', channel: '', sector: '', companyCity: '', companyAddress: '', companyState: '', competitors: '', priceSensitivity: '', expectedVolume: '', meetingType: '', meetingSubject: '', meetingDate: '', nextMeetingDate: ''
             };
-
-            allVisits.push(updateEntry);
-            saveVisits();
-            updateUI();
-            
-            document.getElementById('update-company-name').value = '';
-            document.getElementById('update-notes-text').value = '';
-            modalUpdate.classList.add('hidden');
-            feedbackMessage.textContent = "Aggiornamento Note Salvato!";
-            setTimeout(() => feedbackMessage.textContent = '', 3000);
+            allVisits.push(updateEntry); saveVisits(); updateUI();
+            document.getElementById('update-company-name').value = ''; document.getElementById('update-notes-text').value = '';
+            modalUpdate.classList.add('hidden'); feedbackMessage.textContent = "Aggiornamento Note Salvato!"; setTimeout(() => feedbackMessage.textContent = '', 3000);
         });
 
-        // --- EXPORT CSV ---
-        const escapeCSV = (str) => {
-            if (str === null || str === undefined) return '';
-            str = String(str).replace(/[\r\n]+/g, " - "); // Fix Newlines
-            if (str.match(/^\d{4}-\d{2}-\d{2}$/)) str = str.split('-').reverse().join('/'); // Fix Date
-            if (str.includes(',') || str.includes('"') || str.includes(';')) {
-                str = str.replace(/"/g, '""');
-                return `"${str}"`;
-            }
-            return str;
-        };
-
-        exportButton.addEventListener('click', () => {
-            if (allVisits.length === 0) return;
+        // --- EXPORT FUNZIONI ---
+        const generateCSVContent = () => {
+            const escapeCSV = (str) => {
+                if (str === null || str === undefined) return '';
+                str = String(str).replace(/[\r\n]+/g, " - "); 
+                if (str.match(/^\d{4}-\d{2}-\d{2}$/)) str = str.split('-').reverse().join('/');
+                if (str.includes(',') || str.includes('"') || str.includes(';')) { str = str.replace(/"/g, '""'); return `"${str}"`; }
+                return str;
+            };
             const headers = Object.values(fieldLabels);
             const csvRows = [headers.join(',')];
-
             allVisits.forEach(v => {
                 v.contacts.forEach(c => {
-                    const flatRow = { ...v, 
-                        contactName: c.name, contactSurname: c.surname, 
-                        contactPhone: c.phone, contactEmail: c.email, contactRole: c.role 
-                    };
+                    const flatRow = { ...v, contactName: c.name, contactSurname: c.surname, contactPhone: c.phone, contactEmail: c.email, contactRole: c.role };
                     csvRows.push(Object.keys(fieldLabels).map(k => escapeCSV(flatRow[k])).join(','));
                 });
             });
+            return '\uFEFF' + csvRows.join('\n');
+        };
 
-            const blob = new Blob(['\uFEFF' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        // EXPORT TXT (PER PC)
+        exportButton.addEventListener('click', () => {
+            if (allVisits.length === 0) return;
+            const csvContent = generateCSVContent();
+            const blob = new Blob([csvContent], { type: 'text/plain;charset=utf-8;' }); // MIME text/plain
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `report-visite-${new Date().toISOString().slice(0,10)}.csv`;
+            
+            // --- NEW: FILENAME WITH TIME ---
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            link.download = `report-visite-${year}-${month}-${day}_${hours}-${minutes}.txt`;
+            
             link.click();
         });
 
-        // --- ANTEPRIMA ---
+        // SHARE NATIVO (PER MOBILE)
+        btnShareMobile.addEventListener('click', async () => {
+            if (allVisits.length === 0) return;
+            const csvContent = generateCSVContent();
+            
+            // --- NEW: FILENAME WITH TIME ---
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const fileName = `report-visite-${year}-${month}-${day}_${hours}-${minutes}.txt`;
+
+            // Creiamo un File vero e proprio
+            const file = new File([csvContent], fileName, { type: 'text/plain' });
+            
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Report Visite',
+                        text: 'Ecco il report visite aggiornato.'
+                    });
+                    feedbackMessage.textContent = "File condiviso!";
+                } catch (err) {
+                    console.error("Errore condivisione:", err);
+                }
+            } else {
+                alert("Il tuo dispositivo non supporta la condivisione file diretta. Usa il tasto Scarica.");
+            }
+        });
+
         previewButton.addEventListener('click', () => {
             let txt = '';
             allVisits.forEach((v, i) => {
                 txt += `--- VISITA ${i+1} ---\nAZIENDA: ${v.companyName}\n`;
                 if (v.notes.startsWith(">>>")) txt += `TIPO: ${v.notes}\n`; 
-                else {
-                    txt += `DIVISIONI: ${v.division}\nCANALE: ${v.channel}\nSETTORE: ${v.sector}\n`;
-                    txt += `NOTE: ${v.notes}\n`;
-                }
+                else { txt += `DIVISIONI: ${v.division}\nCANALE: ${v.channel}\nSETTORE: ${v.sector}\nNOTE: ${v.notes}\n`; }
                 txt += `\n`;
             });
-            previewContent.textContent = txt;
-            previewBox.classList.remove('hidden');
-            previewBox.scrollIntoView({behavior: 'smooth'});
+            previewContent.textContent = txt; previewBox.classList.remove('hidden'); previewBox.scrollIntoView({behavior: 'smooth'});
         });
         btnClosePreview.addEventListener('click', () => previewBox.classList.add('hidden'));
 
-        // --- ALTRE FUNZIONI (QR, Svuota) ---
         clearButton.addEventListener('click', () => modalConfirm.classList.remove('hidden'));
         modalBtnCancel.addEventListener('click', () => modalConfirm.classList.add('hidden'));
         modalBtnConfirm.addEventListener('click', () => { allVisits=[]; saveVisits(); updateUI(); modalConfirm.classList.add('hidden'); });
 
-        const onScanSuccess = (decodedText, decodedResult) => {
-            // RESTORED SMART LOGIC HERE
+        // QR LOGIC
+        const onScanSuccess = (decodedText) => {
             const success = parseVCard(decodedText) || parseJSON(decodedText);
-            if (success) {
-                feedbackMessage.textContent = "Dati QR importati con successo!";
-            } else {
-                // Fallback
-                fields.notes.value = (fields.notes.value ? fields.notes.value + '\n\n' : '') + '--- DATI DA QR CODE ---\n' + decodedText;
-                feedbackMessage.textContent = "Testo QR copiato nelle Note!";
-                currentPage = 3;
-                showPage(3);
-            }
-            stopQr();
-            setTimeout(() => feedbackMessage.textContent = '', 4000);
+            if (success) feedbackMessage.textContent = "Dati QR importati!";
+            else { meetingFields.notes.value = (meetingFields.notes.value ? meetingFields.notes.value + ' - ' : '') + 'DATI QR: ' + decodedText; feedbackMessage.textContent = "QR copiato nelle Note!"; currentPage = 3; showPage(3); }
+            stopQr(); setTimeout(() => feedbackMessage.textContent = '', 4000);
         };
         const stopQr = () => { if(html5QrCode) html5QrCode.stop().catch(()=>{}); qrModal.classList.add('hidden'); };
-        
         btnScanQr.addEventListener('click', () => {
             qrModal.classList.remove('hidden');
             if(!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
@@ -808,61 +635,38 @@
         });
         btnCloseQr.addEventListener('click', stopQr);
 
-        // PARSING FUNCTIONS RESTORED
+        // QR PARSERS RESTORED
         const parseVCard = (text) => {
             if (!text.startsWith('BEGIN:VCARD')) return false;
             let vCardData = {};
-            // Robust split for different newline types
             text.split(/\r\n|\r|\n/).forEach(line => {
                 if (line.includes(':')) {
                     let [key, ...value] = line.split(':');
-                    value = value.join(':').replace(/\\,/g, ',').replace(/\\n/g, '\n');
-                    key = key.split(';')[0].trim().toUpperCase();
-                    vCardData[key] = value.trim();
+                    vCardData[key.split(';')[0].trim().toUpperCase()] = value.join(':').trim();
                 }
             });
             if (vCardData.ORG) companyFields.companyName.value = vCardData.ORG;
-            if (vCardData.ADR) {
-                const parts = vCardData.ADR.split(';');
-                if (parts[2]) companyFields.companyAddress.value = parts[2];
-                if (parts[3]) companyFields.companyCity.value = parts[3];
-                if (parts[4]) companyFields.companyState.value = parts[4];
-            }
-            // Populate first contact fields in multi-contact list input area
-            if (vCardData.N) {
-                const [surname, name] = vCardData.N.split(';');
-                contactInputs.surname.value = surname || '';
-                contactInputs.name.value = name || '';
-            } else if (vCardData.FN) {
-                const nameParts = vCardData.FN.split(' ');
-                contactInputs.name.value = nameParts[0];
-                contactInputs.surname.value = nameParts.slice(1).join(' ');
-            }
+            if (vCardData.ADR) { const p = vCardData.ADR.split(';'); if(p[2]) companyFields.companyAddress.value = p[2]; if(p[3]) companyFields.companyCity.value = p[3]; if(p[4]) companyFields.companyState.value = p[4]; }
+            if (vCardData.N) { const [s, n] = vCardData.N.split(';'); contactInputs.surname.value = s||''; contactInputs.name.value = n||''; }
             if (vCardData.TEL) contactInputs.phone.value = vCardData.TEL;
             if (vCardData.EMAIL) contactInputs.email.value = vCardData.EMAIL;
             if (vCardData.TITLE) contactInputs.role.value = vCardData.TITLE;
             return true;
         };
-        
         const parseJSON = (text) => {
             try {
                 const data = JSON.parse(text);
-                const lowerData = {};
-                for (const key in data) lowerData[key.toLowerCase()] = data[key];
-                
-                companyFields.companyName.value = lowerData.company || lowerData.azienda || lowerData.org || companyFields.companyName.value;
-                companyFields.companyAddress.value = lowerData.address || lowerData.indirizzo || companyFields.companyAddress.value;
-                companyFields.companyCity.value = lowerData.city || lowerData.citta || companyFields.companyCity.value;
-                companyFields.companyState.value = lowerData.state || lowerData.regione || companyFields.companyState.value;
-
-                contactInputs.name.value = lowerData.name || lowerData.nome || contactInputs.name.value;
-                contactInputs.surname.value = lowerData.surname || lowerData.cognome || contactInputs.surname.value;
-                contactInputs.email.value = lowerData.email || contactInputs.email.value;
-                contactInputs.phone.value = lowerData.phone || contactInputs.phone.value;
+                const l = {}; for(let k in data) l[k.toLowerCase()] = data[k];
+                companyFields.companyName.value = l.company || l.azienda || l.org || companyFields.companyName.value;
+                companyFields.companyAddress.value = l.address || l.indirizzo || companyFields.companyAddress.value;
+                companyFields.companyCity.value = l.city || l.citta || companyFields.companyCity.value;
+                companyFields.companyState.value = l.state || l.regione || companyFields.companyState.value;
+                contactInputs.name.value = l.name || l.nome || contactInputs.name.value;
+                contactInputs.surname.value = l.surname || l.cognome || contactInputs.surname.value;
+                contactInputs.email.value = l.email || contactInputs.email.value;
+                contactInputs.phone.value = l.phone || contactInputs.phone.value;
                 return true;
-            } catch (e) {
-                return false;
-            }
+            } catch (e) { return false; }
         };
 
         loadVisits();
@@ -871,5 +675,5 @@
     </script>
 </body>
 </html>
-</html>
+
 
