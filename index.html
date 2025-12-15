@@ -72,6 +72,10 @@
         /* Accordion Animation */
         .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
         .rotate-180 { transform: rotate(180deg); }
+
+        /* Select Wrapper Style */
+        .select-wrapper { position: relative; }
+        .select-wrapper::after { content: ''; position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid #6b7280; pointer-events: none; }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden">
@@ -157,7 +161,7 @@
         <aside class="hidden md:flex w-64 bg-white border-r border-gray-200 flex-col z-20">
             <div class="p-6 border-b border-gray-100 flex items-center gap-3">
                 <img src="Logo CERVE WebApp.jpg" class="w-8 h-8 rounded shadow-sm object-cover">
-                <span class="font-bold text-lg text-cerve tracking-tight">Cerve CRM</span>
+                <span class="font-bold text-lg text-cerve tracking-tight">Cerve Sales</span> <!-- RINOMINATO -->
             </div>
             <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
                 <button onclick="nav('dashboard')" class="nav-item active w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-gray-600 hover:bg-cerve-light hover:text-cerve transition-colors" id="menu-dashboard"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard</button>
@@ -214,7 +218,7 @@
                             <div id="step-1" class="form-step">
                                 <div class="flex justify-end mb-4"><button type="button" onclick="startQR()" class="text-cerve border border-cerve px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2"><i data-lucide="qr-code" class="w-4 h-4"></i> Scan QR</button></div>
                                 <div class="grid md:grid-cols-2 gap-4">
-                                    <div class="md:col-span-2"><label class="label-tiny">Ragione Sociale</label><input id="inp-company" class="input-cerve font-bold"></div>
+                                    <div class="md:col-span-2"><label class="label-tiny">Nome Azienda</label><input id="inp-company" class="input-cerve font-bold"></div> <!-- Rinomina -->
                                     <div><label class="label-tiny">Città</label><input id="inp-city" class="input-cerve"></div>
                                     <div><label class="label-tiny">Indirizzo</label><input id="inp-address" class="input-cerve"></div>
                                     
@@ -235,8 +239,8 @@
                                     </div>
 
                                     <div><label class="label-tiny">Concorrenti Citati</label><input id="inp-competitors" class="input-cerve"></div>
-                                    <div><label class="label-tiny">Sensibilità Prezzo</label><input list="l-price" id="inp-price" class="input-cerve" placeholder="Seleziona..."><datalist id="l-price"><option value="Alta"></option><option value="Media"></option><option value="Bassa"></option></datalist></div>
-                                    <div><label class="label-tiny">Volumi Attesi</label><input list="l-vol" id="inp-vol" class="input-cerve" placeholder="Seleziona..."><datalist id="l-vol"><option value="Alti"></option><option value="Medi"></option><option value="Bassi"></option></datalist></div>
+                                    <div class="select-wrapper"><label class="label-tiny">Sensibilità Prezzo</label><input list="l-price" id="inp-price" class="input-cerve" placeholder="Seleziona..."><datalist id="l-price"><option value="Alta"></option><option value="Media"></option><option value="Bassa"></option></datalist></div>
+                                    <div class="select-wrapper"><label class="label-tiny">Volumi Attesi</label><input list="l-vol" id="inp-vol" class="input-cerve" placeholder="Seleziona..."><datalist id="l-vol"><option value="Alti"></option><option value="Medi"></option><option value="Bassi"></option></datalist></div>
                                 </div>
                             </div>
                             <!-- STEP 2 -->
@@ -256,7 +260,7 @@
                                 <h3 class="text-sm font-bold text-gray-800 border-b pb-2 mb-4">Dettagli Incontro</h3>
                                 <div class="grid md:grid-cols-2 gap-4">
                                     <div><label class="label-tiny">Data</label><input type="date" id="inp-date" class="input-cerve"></div>
-                                    <div><label class="label-tiny">Tipo</label><select id="inp-type" class="input-cerve"><option>Visita</option><option>Email</option><option>Fiera</option></select></div>
+                                    <div class="select-wrapper"><label class="label-tiny">Tipo di Incontro</label><select id="inp-type" class="input-cerve"><option>Visita</option><option>Email</option><option>Fiera</option></select></div>
                                     <div class="md:col-span-2"><label class="label-tiny">Oggetto</label><input id="inp-subject" class="input-cerve"></div>
                                     <div><label class="label-tiny">Data Prossimo Incontro</label><input type="date" id="inp-next-date" class="input-cerve"></div>
                                 </div>
@@ -319,6 +323,7 @@
                 <button onclick="nav('dashboard')" class="mobile-nav-item flex flex-col items-center p-2 text-gray-400 text-xs"><i data-lucide="layout-dashboard" class="w-6 h-6 mb-1"></i>Dash</button>
                 <button onclick="nav('new-report')" class="mobile-nav-item flex flex-col items-center p-2 text-cerve font-bold text-xs"><div class="bg-cerve text-white rounded-full p-2 -mt-6 shadow-lg border-4 border-white"><i data-lucide="plus" class="w-6 h-6"></i></div></button>
                 <button onclick="nav('companies')" class="mobile-nav-item flex flex-col items-center p-2 text-gray-400 text-xs"><i data-lucide="building-2" class="w-6 h-6 mb-1"></i>Aziende</button>
+                <button onclick="nav('contacts')" class="mobile-nav-item flex flex-col items-center p-2 text-gray-400 text-xs"><i data-lucide="users" class="w-6 h-6 mb-1"></i>Contatti</button>
             </nav>
         </main>
     </div>
@@ -334,7 +339,7 @@
             <div class="flex-1 overflow-y-auto p-6 space-y-4" id="slide-content">
                 <input type="hidden" id="edit-id">
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="col-span-2"><label class="label-tiny">Azienda</label><input id="edit-company" class="input-cerve font-bold"></div>
+                    <div class="col-span-2"><label class="label-tiny">Nome Azienda</label><input id="edit-company" class="input-cerve font-bold"></div>
                     <div><label class="label-tiny">Città</label><input id="edit-city" class="input-cerve"></div>
                     <div><label class="label-tiny">Agente</label><input id="edit-agent" class="input-cerve"></div>
                     <div><label class="label-tiny">Indirizzo</label><input id="edit-address" class="input-cerve"></div>
@@ -644,31 +649,8 @@
                   closeSlideOver();
              }
         };
-
-        // --- 7. DELETE COMPANY & ALL REPORTS (DEEP) ---
-        window.deleteCompanyAndAllReports = async () => {
-            const companyName = document.getElementById('edit-company').value;
-            if(!companyName) return;
-            
-            if(confirm(`ATTENZIONE: Stai per eliminare l'azienda "${companyName}" e TUTTI i report associati dal database.\n\nQuesta azione è irreversibile. Procedere?`)) {
-                try {
-                    // 1. Trova tutti i report con quel nome
-                    const q = window.query(window.collection(window.db, "reports"), window.where("companyName", "==", companyName));
-                    const snapshot = await window.getDocs(q);
-                    
-                    // 2. Eliminali uno per uno (Firestore non ha delete-by-query nativo da client)
-                    const deletePromises = snapshot.docs.map(doc => window.deleteDoc(doc.ref));
-                    await Promise.all(deletePromises);
-                    
-                    alert(`Eliminati ${snapshot.size} report associati a "${companyName}".`);
-                    closeSlideOver();
-                } catch(e) {
-                    alert("Errore durante l'eliminazione: " + e.message);
-                }
-            }
-        };
         
-        // --- 8. CONTACT MODAL (EDIT ONLY) ---
+        // --- 7. CONTACT MODAL (EDIT ONLY) ---
         window.openContactEdit = (rId, idx) => {
             const r = allReports.find(x => x.id === rId);
             if(!r || !r.contacts[idx]) return;
@@ -725,3 +707,5 @@
     </script>
 </body>
 </html>
+</html>
+
